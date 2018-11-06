@@ -1,0 +1,27 @@
+author: Pim van Pelt <pim@google.com>
+type: lib
+description: Mongoose OS library for APDS-9960
+version: 1.0
+platforms: [esp8266, esp32]
+
+sources:
+  - src
+
+includes:
+  - include
+
+config_schema:
+  - ["apds9960", "o", {title: "APDS9960 settings"}]
+  - ["apds9960.i2caddr", "i", 0x39, {title: "I2C Address"}]
+  - ["apds9960.int_pin", "i", 2, {title: "Interrupt pin"}]
+
+libs:
+  - origin: https://github.com/mongoose-os-libs/i2c
+
+tags:
+  - c
+  - i2c
+  - hw
+  - docs:drivers:APDS9960 I2C
+
+manifest_version: 2017-09-29
