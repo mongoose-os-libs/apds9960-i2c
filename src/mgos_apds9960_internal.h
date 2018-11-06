@@ -24,7 +24,10 @@ extern "C" {
 struct mgos_apds9960 {
   struct mgos_i2c *i2c;
   uint8_t          i2caddr;
+  struct mgos_apds9960_stats stats;
 };
+
+bool mgos_apds9960_i2c_init(void);
 
 #ifdef __cplusplus
 }

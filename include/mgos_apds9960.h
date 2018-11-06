@@ -19,7 +19,7 @@
 #include "mgos_i2c.h"
 
 struct mgos_apds9960;
-struct mgos_apds9660_stats {
+struct mgos_apds9960_stats {
   double   last_read_time;       // value of mg_time() upon last call to _read()
   uint32_t read;                 // calls to _read()
   uint32_t read_success;         // successful _read()
@@ -29,15 +29,15 @@ struct mgos_apds9660_stats {
 };
 
 /*
- * Initialize a APDS9660 on the I2C bus `i2c` at address specified in `i2caddr`
- * parameter (default APDS9660 is on address 0x39). The sensor will be polled for
+ * Initialize a APDS9960 on the I2C bus `i2c` at address specified in `i2caddr`
+ * parameter (default APDS9960 is on address 0x39). The sensor will be polled for
  * validity, upon success a new `struct mgos_apds9960` is allocated and
  * returned. If the device could not be found, NULL is returned.
  */
 struct mgos_apds9960 *mgos_apds9960_create(struct mgos_i2c *i2c, uint8_t i2caddr);
 
 /*
- * Destroy the data structure associated with a APDS9660 device. The reference
+ * Destroy the data structure associated with a APDS9960 device. The reference
  * to the pointer of the `struct mgos_apds9960` has to be provided, and upon
  * successful destruction, its associated memory will be freed and the pointer
  * set to NULL.
@@ -46,10 +46,10 @@ void mgos_apds9960_destroy(struct mgos_apds9960 **sensor);
 
 /*
  * Returns the running statistics on the sensor interaction, the user provides
- * a pointer to a `struct mgos_apds9660_stats` object, which is filled in by this
+ * a pointer to a `struct mgos_apds9960_stats` object, which is filled in by this
  * call.
  *
  * Upon success, true is returned. Otherwise, false is returned, in which case
  * the contents of `stats` is undetermined.
  */
-bool mgos_apds9660_getStats(struct mgos_apds9660 *sensor, struct mgos_apds9660_stats *stats);
+bool mgos_apds9960_getStats(struct mgos_apds9960 *sensor, struct mgos_apds9960_stats *stats);
