@@ -58,6 +58,15 @@ void mgos_apds9960_destroy(struct mgos_apds9960 **sensor) {
   return;
 }
 
+bool mgos_apds9960_getStats(struct mgos_apds9960 *sensor, struct mgos_apds9960_stats *stats) {
+  if (!sensor || !stats) {
+    return false;
+  }
+
+  memcpy((void *)stats, (const void *)&sensor->stats, sizeof(struct mgos_apds9960_stats));
+  return true;
+}
+
 bool mgos_apds9960_i2c_init(void) {
   return true;
 }

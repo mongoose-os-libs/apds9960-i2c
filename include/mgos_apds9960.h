@@ -19,6 +19,14 @@
 #include "mgos_i2c.h"
 
 struct mgos_apds9960;
+struct mgos_apds9660_stats {
+  double   last_read_time;       // value of mg_time() upon last call to _read()
+  uint32_t read;                 // calls to _read()
+  uint32_t read_success;         // successful _read()
+  uint32_t read_success_cached;  // calls to _read() which were cached
+  // Note: read_errors := read - read_success - read_success_cached
+  double   read_success_usecs;   // time spent in successful uncached _read()
+};
 
 /*
  * Initialize a APDS9660 on the I2C bus `i2c` at address specified in `i2caddr`
@@ -35,3 +43,13 @@ struct mgos_apds9960 *mgos_apds9960_create(struct mgos_i2c *i2c, uint8_t i2caddr
  * set to NULL.
  */
 void mgos_apds9960_destroy(struct mgos_apds9960 **sensor);
+
+/*
+ * Returns the running statistics on the sensor interaction, the user provides
+ * a pointer to a `struct mgos_apds9660_stats` object, which is filled in by this
+ * call.
+ *
+ * Upon success, true is returned. Otherwise, false is returned, in which case
+ * the contents of `stats` is undetermined.
+ */
+bool mgos_apds9660_getStats(struct mgos_apds9660 *sensor, struct mgos_apds9660_stats *stats);
