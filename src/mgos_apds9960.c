@@ -911,54 +911,132 @@ bool mgos_apds9960_enable_light_sensor(struct mgos_apds9960 *sensor, bool interr
   if (!sensor) {
     return false;
   }
-  return false;
+  /* Set default gain, interrupts, enable power, and enable sensor */
+  if (!mgos_apds9960_set_ambient_light_gain(sensor, APDS9960_DEFAULT_AGAIN)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_ambient_light_int_enable(sensor, interrupts)) {
+    return false;
+  }
+  if (!mgos_apds9960_enable(sensor)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_mode(sensor, APDS9960_AMBIENT_LIGHT, 1)) {
+    return false;
+  }
 
-  (void)interrupts;
+  return true;
 }
 
-bool mgos_apds9960_disable_light_sensor(struct mgos_apds9960 *sensor, bool interrupts) {
+bool mgos_apds9960_disable_light_sensor(struct mgos_apds9960 *sensor) {
   if (!sensor) {
     return false;
   }
-  return false;
-
-  (void)interrupts;
+  if (!mgos_apds9960_set_ambient_light_int_enable(sensor, 0)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_mode(sensor, APDS9960_AMBIENT_LIGHT, 0)) {
+    return false;
+  }
+  return true;
 }
 
 bool mgos_apds9960_enable_proximity_sensor(struct mgos_apds9960 *sensor, bool interrupts) {
   if (!sensor) {
     return false;
   }
-  return false;
+  /* Set default gain, LED, interrupts, enable power, and enable sensor */
+  if (!mgos_apds9960_set_proximity_gain(sensor, APDS9960_DEFAULT_PGAIN)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_led_drive(sensor, APDS9960_DEFAULT_LDRIVE)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_proximity_int_enable(sensor, interrupts)) {
+    return false;
+  }
+  if (!mgos_apds9960_enable(sensor)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_mode(sensor, APDS9960_PROXIMITY, 1)) {
+    return false;
+  }
 
-  (void)interrupts;
+  return true;
 }
 
-bool mgos_apds9960_disable_proximity_sensor(struct mgos_apds9960 *sensor, bool interrupts) {
+bool mgos_apds9960_disable_proximity_sensor(struct mgos_apds9960 *sensor) {
   if (!sensor) {
     return false;
   }
-  return false;
-
-  (void)interrupts;
+  if (!mgos_apds9960_set_proximity_int_enable(sensor, 0)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_mode(sensor, APDS9960_PROXIMITY, 0)) {
+    return false;
+  }
+  return true;
 }
 
 bool mgos_apds9960_enable_gesture_sensor(struct mgos_apds9960 *sensor, bool interrupts) {
   if (!sensor) {
     return false;
   }
-  return false;
 
-  (void)interrupts;
+  /* Enable gesture mode
+   * Set ENABLE to 0 (power off)
+   * Set WTIME to 0xFF
+   * Set AUX to LED_BOOST_300
+   * Enable PON, WEN, PEN, GEN in ENABLE
+   */
+  mgos_apds9960_resetGestureParameters(sensor);
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_WTIME, 0xFF)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_PPULSE, APDS9960_DEFAULT_GESTURE_PPULSE)) {
+    return false;
+  }
+  if (!mgos_apds9960_setLEDBoost(sensor, APDS9960_LED_BOOST_300)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_gesture_int_enable(sensor, interrupts)) {
+    return false;
+  }
+  if (!mgos_apds9960_setGestureMode(sensor, 1)) {
+    return false;
+  }
+  if (!mgos_apds9960_enable(sensor)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_mode(sensor, APDS9960_WAIT, 1)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_mode(sensor, APDS9960_PROXIMITY, 1)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_mode(sensor, APDS9960_GESTURE, 1)) {
+    return false;
+  }
+
+  return true;
 }
 
-bool mgos_apds9960_disable_gesture_sensor(struct mgos_apds9960 *sensor, bool interrupts) {
+bool mgos_apds9960_disable_gesture_sensor(struct mgos_apds9960 *sensor) {
   if (!sensor) {
     return false;
   }
-  return false;
+  mgos_apds9960_resetGestureParameters(sensor);
+  if (!mgos_apds9960_set_gesture_int_enable(sensor, 0)) {
+    return false;
+  }
+  if (!mgos_apds9960_setGestureMode(sensor, 0)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_mode(sensor, APDS9960_GESTURE, 0)) {
+    return false;
+  }
 
-  (void)interrupts;
+  return true;
 }
 
 uint8_t mgos_apds9960_get_led_drive(struct mgos_apds9960 *sensor) {

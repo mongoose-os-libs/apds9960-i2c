@@ -52,11 +52,11 @@ uint8_t mgos_apds9960_get_mode(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_set_mode(struct mgos_apds9960 *sensor, uint8_t mode, uint8_t enable);
 
 bool mgos_apds9960_enable_light_sensor(struct mgos_apds9960 *sensor, bool interrupts);
-bool mgos_apds9960_disable_light_sensor(struct mgos_apds9960 *sensor, bool interrupts);
+bool mgos_apds9960_disable_light_sensor(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_enable_proximity_sensor(struct mgos_apds9960 *sensor, bool interrupts);
-bool mgos_apds9960_disable_proximity_sensor(struct mgos_apds9960 *sensor, bool interrupts);
+bool mgos_apds9960_disable_proximity_sensor(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_enable_gesture_sensor(struct mgos_apds9960 *sensor, bool interrupts);
-bool mgos_apds9960_disable_gesture_sensor(struct mgos_apds9960 *sensor, bool interrupts);
+bool mgos_apds9960_disable_gesture_sensor(struct mgos_apds9960 *sensor);
 
 uint8_t mgos_apds9960_get_led_drive(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_set_led_drive(struct mgos_apds9960 *sensor, uint8_t drive);
