@@ -46,8 +46,8 @@ void mgos_apds9960_destroy(struct mgos_apds9960 **sensor);
 
 
 bool mgos_apds9960_init(struct mgos_apds9960 *sensor);
-void mgos_apds9960_enable(struct mgos_apds9960 *sensor);
-void mgos_apds9960_disable(struct mgos_apds9960 *sensor);
+bool mgos_apds9960_enable(struct mgos_apds9960 *sensor);
+bool mgos_apds9960_disable(struct mgos_apds9960 *sensor);
 uint8_t mgos_apds9960_get_mode(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_set_mode(struct mgos_apds9960 *sensor, uint8_t mode, uint8_t enable);
 

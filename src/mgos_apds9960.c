@@ -841,35 +841,70 @@ bool mgos_apds9960_init(struct mgos_apds9960 *sensor) {
   return true;
 }
 
-void mgos_apds9960_enable(struct mgos_apds9960 *sensor) {
-  if (!sensor) {
-    return;
-  }
-  return;
-}
-
-void mgos_apds9960_disable(struct mgos_apds9960 *sensor) {
-  if (!sensor) {
-    return;
-  }
-  return;
-}
-
-uint8_t mgos_apds9960_get_mode(struct mgos_apds9960 *sensor) {
-  if (!sensor) {
-    return 0;
-  }
-  return 0;
-}
-
-bool mgos_apds9960_set_mode(struct mgos_apds9960 *sensor, uint8_t mode, uint8_t enable) {
+bool mgos_apds9960_enable(struct mgos_apds9960 *sensor) {
   if (!sensor) {
     return false;
   }
-  return false;
+  return mgos_apds9960_set_mode(sensor, APDS9960_POWER, 1);
+}
 
-  (void)mode;
-  (void)enable;
+bool mgos_apds9960_disable(struct mgos_apds9960 *sensor) {
+  if (!sensor) {
+    return false;
+  }
+  return mgos_apds9960_set_mode(sensor, APDS9960_POWER, 0);
+}
+
+uint8_t mgos_apds9960_get_mode(struct mgos_apds9960 *sensor) {
+  uint8_t val;
+
+  if (!sensor) {
+    return 0;
+  }
+
+  /* Read current ENABLE register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
+    return APDS9960_ERROR;
+  }
+
+  return val;
+}
+
+bool mgos_apds9960_set_mode(struct mgos_apds9960 *sensor, uint8_t mode, uint8_t enable) {
+  uint8_t val;
+
+  if (!sensor) {
+    return false;
+  }
+
+  /* Read current ENABLE register */
+  val = mgos_apds9960_get_mode(sensor);
+  if (val == APDS9960_ERROR) {
+    return false;
+  }
+
+  /* Change bit(s) in ENABLE register */
+  enable = enable & 0x01;
+  if (mode <= 6) {
+    if (enable) {
+      val |= (1 << mode);
+    } else {
+      val &= ~(1 << mode);
+    }
+  } else if (mode == APDS9960_ALL) {
+    if (enable) {
+      val = 0x7F;
+    } else {
+      val = 0x00;
+    }
+  }
+
+  /* Write value back to ENABLE register */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_ENABLE, val)) {
+    return false;
+  }
+
+  return true;
 }
 
 bool mgos_apds9960_enable_light_sensor(struct mgos_apds9960 *sensor, bool interrupts) {
