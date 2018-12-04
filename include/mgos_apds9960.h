@@ -45,7 +45,7 @@ struct mgos_apds9960 *mgos_apds9960_create(struct mgos_i2c *i2c, uint8_t i2caddr
 void mgos_apds9960_destroy(struct mgos_apds9960 **sensor);
 
 
-void mgos_apds9960_init(struct mgos_apds9960 *sensor);
+bool mgos_apds9960_init(struct mgos_apds9960 *sensor);
 void mgos_apds9960_enable(struct mgos_apds9960 *sensor);
 void mgos_apds9960_disable(struct mgos_apds9960 *sensor);
 uint8_t mgos_apds9960_get_mode(struct mgos_apds9960 *sensor);
@@ -62,6 +62,13 @@ uint8_t mgos_apds9960_get_led_drive(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_set_led_drive(struct mgos_apds9960 *sensor, uint8_t drive);
 uint8_t mgos_apds9960_get_gesture_led_drive(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_set_gesture_led_drive(struct mgos_apds9960 *sensor, uint8_t drive);
+
+uint8_t mgos_apds9960_get_ambient_light_gain(struct mgos_apds9960 *sensor);
+bool mgos_apds9960_set_ambient_light_gain(struct mgos_apds9960 *sensor, uint8_t gain);
+uint8_t mgos_apds9960_get_proximity_gain(struct mgos_apds9960 *sensor);
+bool mgos_apds9960_set_proximity_gain(struct mgos_apds9960 *sensor, uint8_t gain);
+uint8_t mgos_apds9960_get_gesture_gain(struct mgos_apds9960 *sensor);
+bool mgos_apds9960_set_gesture_gain(struct mgos_apds9960 *sensor, uint8_t gain);
 
 bool mgos_apds9960_get_light_int_low_threshold(struct mgos_apds9960 *sensor, uint16_t *threshold);
 bool mgos_apds9960_set_light_int_low_threshold(struct mgos_apds9960 *sensor, uint16_t threshold);

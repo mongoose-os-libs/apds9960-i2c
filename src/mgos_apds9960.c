@@ -727,11 +727,118 @@ static int mgos_apds9960_wireReadDataBlock(struct mgos_apds9960 *sensor, uint8_t
   (void)len;
 }
 
-void mgos_apds9960_init(struct mgos_apds9960 *sensor) {
+bool mgos_apds9960_init(struct mgos_apds9960 *sensor) {
+  uint8_t id;
+
   if (!sensor) {
-    return;
+    return false;
   }
-  return;
+
+  /* Read ID register and check against known values for APDS-9960 */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ID, &id)) {
+    return false;
+  }
+  if (!(id == APDS9960_ID_1 || id == APDS9960_ID_2)) {
+    return false;
+  }
+
+  /* Set ENABLE register to 0 (disable all features) */
+  if (!mgos_apds9960_set_mode(sensor, APDS9960_ALL, APDS9960_OFF)) {
+    return false;
+  }
+
+  /* Set default values for ambient light and proximity registers */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_ATIME, APDS9960_DEFAULT_ATIME)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_WTIME, APDS9960_DEFAULT_WTIME)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_PPULSE, APDS9960_DEFAULT_PROX_PPULSE)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_POFFSET_UR, APDS9960_DEFAULT_POFFSET_UR)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_POFFSET_DL, APDS9960_DEFAULT_POFFSET_DL)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONFIG1, APDS9960_DEFAULT_CONFIG1)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_led_drive(sensor, APDS9960_DEFAULT_LDRIVE)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_proximity_gain(sensor, APDS9960_DEFAULT_PGAIN)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_ambient_light_gain(sensor, APDS9960_DEFAULT_AGAIN)) {
+    return false;
+  }
+  if (!mgos_apds9960_setProxIntLowThresh(sensor, APDS9960_DEFAULT_PILT)) {
+    return false;
+  }
+  if (!mgos_apds9960_setProxIntHighThresh(sensor, APDS9960_DEFAULT_PIHT)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_light_int_low_threshold(sensor, APDS9960_DEFAULT_AILT)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_light_int_high_threshold(sensor, APDS9960_DEFAULT_AIHT)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_PERS, APDS9960_DEFAULT_PERS)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONFIG2, APDS9960_DEFAULT_CONFIG2)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONFIG3, APDS9960_DEFAULT_CONFIG3)) {
+    return false;
+  }
+
+  /* Set default values for gesture sense registers */
+  if (!mgos_apds9960_setGestureEnterThresh(sensor, APDS9960_DEFAULT_GPENTH)) {
+    return false;
+  }
+  if (!mgos_apds9960_setGestureExitThresh(sensor, APDS9960_DEFAULT_GEXTH)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GCONF1, APDS9960_DEFAULT_GCONF1)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_gesture_gain(sensor, APDS9960_DEFAULT_GGAIN)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_gesture_led_drive(sensor, APDS9960_DEFAULT_GLDRIVE)) {
+    return false;
+  }
+  if (!mgos_apds9960_setGestureWaitTime(sensor, APDS9960_DEFAULT_GWTIME)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GOFFSET_U, APDS9960_DEFAULT_GOFFSET)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GOFFSET_D, APDS9960_DEFAULT_GOFFSET)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GOFFSET_L, APDS9960_DEFAULT_GOFFSET)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GOFFSET_R, APDS9960_DEFAULT_GOFFSET)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GPULSE, APDS9960_DEFAULT_GPULSE)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GCONF3, APDS9960_DEFAULT_GCONF3)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_gesture_int_enable(sensor, APDS9960_DEFAULT_GIEN)) {
+    return false;
+  }
+
+  return true;
 }
 
 void mgos_apds9960_enable(struct mgos_apds9960 *sensor) {
@@ -849,6 +956,54 @@ bool mgos_apds9960_set_gesture_led_drive(struct mgos_apds9960 *sensor, uint8_t d
   return false;
 
   (void)drive;
+}
+
+uint8_t mgos_apds9960_get_ambient_light_gain(struct mgos_apds9960 *sensor) {
+  if (!sensor) {
+    return 0;
+  }
+  return 0;
+}
+
+bool mgos_apds9960_set_ambient_light_gain(struct mgos_apds9960 *sensor, uint8_t gain) {
+  if (!sensor) {
+    return false;
+  }
+  return false;
+
+  (void)gain;
+}
+
+uint8_t mgos_apds9960_get_proximity_gain(struct mgos_apds9960 *sensor) {
+  if (!sensor) {
+    return 0;
+  }
+  return 0;
+}
+
+bool mgos_apds9960_set_proximity_gain(struct mgos_apds9960 *sensor, uint8_t gain) {
+  if (!sensor) {
+    return false;
+  }
+  return false;
+
+  (void)gain;
+}
+
+uint8_t mgos_apds9960_get_gesture_gain(struct mgos_apds9960 *sensor) {
+  if (!sensor) {
+    return 0;
+  }
+  return 0;
+}
+
+bool mgos_apds9960_set_gesture_gain(struct mgos_apds9960 *sensor, uint8_t gain) {
+  if (!sensor) {
+    return false;
+  }
+  return false;
+
+  (void)gain;
 }
 
 bool mgos_apds9960_get_light_int_low_threshold(struct mgos_apds9960 *sensor, uint16_t *threshold) {

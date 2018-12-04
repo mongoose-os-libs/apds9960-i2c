@@ -164,9 +164,9 @@ extern "C" {
 #define APDS9960_DEFAULT_POFFSET_UR        0     // 0 offset
 #define APDS9960_DEFAULT_POFFSET_DL        0     // 0 offset
 #define APDS9960_DEFAULT_CONFIG1           0x60  // No 12x wait (WTIME) factor
-#define APDS9960_DEFAULT_LDRIVE            LED_DRIVE_100MA
-#define APDS9960_DEFAULT_PGAIN             PGAIN_4X
-#define APDS9960_DEFAULT_AGAIN             AGAIN_4X
+#define APDS9960_DEFAULT_LDRIVE            APDS9960_LED_DRIVE_100MA
+#define APDS9960_DEFAULT_PGAIN             APDS9960_PGAIN_4X
+#define APDS9960_DEFAULT_AGAIN             APDS9960_AGAIN_4X
 #define APDS9960_DEFAULT_PILT              0      // Low proximity threshold
 #define APDS9960_DEFAULT_PIHT              50     // High proximity threshold
 #define APDS9960_DEFAULT_AILT              0xFFFF // Force interrupt for calibration
@@ -177,9 +177,9 @@ extern "C" {
 #define APDS9960_DEFAULT_GPENTH            40     // Threshold for entering gesture mode
 #define APDS9960_DEFAULT_GEXTH             30     // Threshold for exiting gesture mode
 #define APDS9960_DEFAULT_GCONF1            0x40   // 4 gesture events for int., 1 for exit
-#define APDS9960_DEFAULT_GGAIN             GGAIN_4X
-#define APDS9960_DEFAULT_GLDRIVE           LED_DRIVE_100MA
-#define APDS9960_DEFAULT_GWTIME            GWTIME_2_8MS
+#define APDS9960_DEFAULT_GGAIN             APDS9960_GGAIN_4X
+#define APDS9960_DEFAULT_GLDRIVE           APDS9960_LED_DRIVE_100MA
+#define APDS9960_DEFAULT_GWTIME            APDS9960_GWTIME_2_8MS
 #define APDS9960_DEFAULT_GOFFSET           0     // No offset scaling for gesture mode
 #define APDS9960_DEFAULT_GPULSE            0xC9  // 32us, 10 pulses
 #define APDS9960_DEFAULT_GCONF3            0     // All photodiodes active during gesture
