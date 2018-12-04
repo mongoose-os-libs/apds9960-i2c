@@ -1040,35 +1040,92 @@ bool mgos_apds9960_disable_gesture_sensor(struct mgos_apds9960 *sensor) {
 }
 
 uint8_t mgos_apds9960_get_led_drive(struct mgos_apds9960 *sensor) {
+  uint8_t val;
+
   if (!sensor) {
     return 0;
   }
-  return 0;
+
+
+  /* Read value from CONTROL register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
+    return APDS9960_ERROR;
+  }
+
+  /* Shift and mask out LED drive bits */
+  val = (val >> 6) & 0b00000011;
+
+  return val;
 }
 
 bool mgos_apds9960_set_led_drive(struct mgos_apds9960 *sensor, uint8_t drive) {
+  uint8_t val;
+
   if (!sensor) {
     return false;
   }
-  return false;
 
-  (void)drive;
+  /* Read value from CONTROL register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
+    return false;
+  }
+
+  /* Set bits in register to given value */
+  drive &= 0b00000011;
+  drive  = drive << 6;
+  val   &= 0b00111111;
+  val   |= drive;
+
+  /* Write register value back into CONTROL register */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONTROL, val)) {
+    return false;
+  }
+
+  return true;
 }
 
 uint8_t mgos_apds9960_get_gesture_led_drive(struct mgos_apds9960 *sensor) {
+  uint8_t val;
+
   if (!sensor) {
     return 0;
   }
-  return 0;
+
+  /* Read value from GCONF2 register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, &val)) {
+    return APDS9960_ERROR;
+  }
+
+  /* Shift and mask out GLDRIVE bits */
+  val = (val >> 3) & 0b00000011;
+
+  return val;
 }
 
 bool mgos_apds9960_set_gesture_led_drive(struct mgos_apds9960 *sensor, uint8_t drive) {
+  uint8_t val;
+
   if (!sensor) {
     return false;
   }
-  return false;
 
-  (void)drive;
+  /* Read value from GCONF2 register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, &val)) {
+    return false;
+  }
+
+  /* Set bits in register to given value */
+  drive &= 0b00000011;
+  drive  = drive << 3;
+  val   &= 0b11100111;
+  val   |= drive;
+
+  /* Write register value back into GCONF2 register */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GCONF2, val)) {
+    return false;
+  }
+
+  return true;
 }
 
 uint8_t mgos_apds9960_get_ambient_light_gain(struct mgos_apds9960 *sensor) {
