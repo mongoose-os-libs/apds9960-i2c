@@ -16,7 +16,7 @@
 
 #include "mgos_apds9960_internal.h"
 
-/*static*/ bool is_apds9960(struct mgos_i2c *i2c, uint8_t i2caddr) {
+static bool is_apds9960(struct mgos_i2c *i2c, uint8_t i2caddr) {
   return false;
 
   (void)i2c;
