@@ -1129,51 +1129,134 @@ bool mgos_apds9960_set_gesture_led_drive(struct mgos_apds9960 *sensor, uint8_t d
 }
 
 uint8_t mgos_apds9960_get_ambient_light_gain(struct mgos_apds9960 *sensor) {
+  uint8_t val;
+
   if (!sensor) {
     return 0;
   }
-  return 0;
+
+  /* Read value from CONTROL register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
+    return APDS9960_ERROR;
+  }
+
+  /* Shift and mask out AGAIN bits */
+  val &= 0b00000011;
+
+  return val;
 }
 
 bool mgos_apds9960_set_ambient_light_gain(struct mgos_apds9960 *sensor, uint8_t gain) {
+  uint8_t val;
+
   if (!sensor) {
     return false;
   }
-  return false;
 
-  (void)gain;
+  /* Read value from CONTROL register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
+    return false;
+  }
+
+  /* Set bits in register to given value */
+  gain &= 0b00000011;
+  val  &= 0b11111100;
+  val  |= gain;
+
+  /* Write register value back into CONTROL register */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONTROL, val)) {
+    return false;
+  }
+
+  return true;
 }
 
 uint8_t mgos_apds9960_get_proximity_gain(struct mgos_apds9960 *sensor) {
+  uint8_t val;
+
   if (!sensor) {
     return 0;
   }
-  return 0;
+
+  /* Read value from CONTROL register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
+    return APDS9960_ERROR;
+  }
+
+  /* Shift and mask out PGAIN bits */
+  val = (val >> 2) & 0b00000011;
+
+
+  return val;
 }
 
 bool mgos_apds9960_set_proximity_gain(struct mgos_apds9960 *sensor, uint8_t gain) {
+  uint8_t val;
+
   if (!sensor) {
     return false;
   }
-  return false;
 
-  (void)gain;
+  /* Read value from CONTROL register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
+    return false;
+  }
+
+  /* Set bits in register to given value */
+  gain &= 0b00000011;
+  gain  = gain << 2;
+  val  &= 0b11110011;
+  val  |= gain;
+
+  /* Write register value back into CONTROL register */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONTROL, val)) {
+    return false;
+  }
+
+  return true;
 }
 
 uint8_t mgos_apds9960_get_gesture_gain(struct mgos_apds9960 *sensor) {
+  uint8_t val;
+
   if (!sensor) {
     return 0;
   }
-  return 0;
+
+  /* Read value from CONTROL register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, &val)) {
+    return APDS9960_ERROR;
+  }
+
+  /* Shift and mask out GGAIN bits */
+  val = (val >> 5) & 0b00000011;
+
+  return val;
 }
 
 bool mgos_apds9960_set_gesture_gain(struct mgos_apds9960 *sensor, uint8_t gain) {
+  uint8_t val;
+
   if (!sensor) {
     return false;
   }
-  return false;
 
-  (void)gain;
+  /* Read value from CONTROL register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, &val)) {
+    return false;
+  }
+
+  /* Set bits in register to given value */
+  gain &= 0b00000011;
+  gain  = gain << 5;
+  val  &= 0b10011111;
+  val  |= gain;
+
+  /* Write register value back into CONTROL register */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GCONF2, val)) {
+    return false;
+  }
+  return true;
 }
 
 bool mgos_apds9960_get_light_int_low_threshold(struct mgos_apds9960 *sensor, uint16_t *threshold) {
