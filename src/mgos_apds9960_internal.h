@@ -21,23 +21,25 @@
 extern "C" {
 #endif
 
+#define DEBUG                              1
+
 /* APDS9960 I2C address */
 #define APDS9960_I2C_ADDR                  0x39
 
 /* Gesture parameters */
-#define APDS9660_GESTURE_THRESHOLD_OUT     10
-#define APDS9660_GESTURE_SENSITIVITY_1     50
-#define APDS9660_GESTURE_SENSITIVITY_2     20
+#define APDS9960_GESTURE_THRESHOLD_OUT     10
+#define APDS9960_GESTURE_SENSITIVITY_1     50
+#define APDS9960_GESTURE_SENSITIVITY_2     20
 
 /* Error code for returned values */
-#define APDS9660_ERROR                     0xFF
+#define APDS9960_ERROR                     0xFF
 
 /* Acceptable device IDs */
 #define APDS9960_ID_1                      0xAB
 #define APDS9960_ID_2                      0x9C
 
 /* Misc parameters */
-#define APDS9660_FIFO_PAUSE_TIME           30    // Wait period (ms) between FIFO reads
+#define APDS9960_FIFO_PAUSE_TIME           30    // Wait period (ms) between FIFO reads
 
 /* APDS-9960 register addresses */
 #define APDS9960_ENABLE                    0x80
@@ -155,56 +157,56 @@ extern "C" {
 #define APDS9960_GWTIME_39_2MS             7
 
 /* Default values */
-#define APDS9660_DEFAULT_ATIME             219   // 103ms
-#define APDS9660_DEFAULT_WTIME             246   // 27ms
-#define APDS9660_DEFAULT_PROX_PPULSE       0x87  // 16us, 8 pulses
-#define APDS9660_DEFAULT_GESTURE_PPULSE    0x89  // 16us, 10 pulses
-#define APDS9660_DEFAULT_POFFSET_UR        0     // 0 offset
-#define APDS9660_DEFAULT_POFFSET_DL        0     // 0 offset
-#define APDS9660_DEFAULT_CONFIG1           0x60  // No 12x wait (WTIME) factor
-#define APDS9660_DEFAULT_LDRIVE            LED_DRIVE_100MA
-#define APDS9660_DEFAULT_PGAIN             PGAIN_4X
-#define APDS9660_DEFAULT_AGAIN             AGAIN_4X
-#define APDS9660_DEFAULT_PILT              0      // Low proximity threshold
-#define APDS9660_DEFAULT_PIHT              50     // High proximity threshold
-#define APDS9660_DEFAULT_AILT              0xFFFF // Force interrupt for calibration
-#define APDS9660_DEFAULT_AIHT              0
-#define APDS9660_DEFAULT_PERS              0x11   // 2 consecutive prox or ALS for int.
-#define APDS9660_DEFAULT_CONFIG2           0x01   // No saturation interrupts or LED boost
-#define APDS9660_DEFAULT_CONFIG3           0      // Enable all photodiodes, no SAI
-#define APDS9660_DEFAULT_GPENTH            40     // Threshold for entering gesture mode
-#define APDS9660_DEFAULT_GEXTH             30     // Threshold for exiting gesture mode
-#define APDS9660_DEFAULT_GCONF1            0x40   // 4 gesture events for int., 1 for exit
-#define APDS9660_DEFAULT_GGAIN             GGAIN_4X
-#define APDS9660_DEFAULT_GLDRIVE           LED_DRIVE_100MA
-#define APDS9660_DEFAULT_GWTIME            GWTIME_2_8MS
-#define APDS9660_DEFAULT_GOFFSET           0     // No offset scaling for gesture mode
-#define APDS9660_DEFAULT_GPULSE            0xC9  // 32us, 10 pulses
-#define APDS9660_DEFAULT_GCONF3            0     // All photodiodes active during gesture
-#define APDS9660_DEFAULT_GIEN              0     // Disable gesture interrupts
+#define APDS9960_DEFAULT_ATIME             219   // 103ms
+#define APDS9960_DEFAULT_WTIME             246   // 27ms
+#define APDS9960_DEFAULT_PROX_PPULSE       0x87  // 16us, 8 pulses
+#define APDS9960_DEFAULT_GESTURE_PPULSE    0x89  // 16us, 10 pulses
+#define APDS9960_DEFAULT_POFFSET_UR        0     // 0 offset
+#define APDS9960_DEFAULT_POFFSET_DL        0     // 0 offset
+#define APDS9960_DEFAULT_CONFIG1           0x60  // No 12x wait (WTIME) factor
+#define APDS9960_DEFAULT_LDRIVE            LED_DRIVE_100MA
+#define APDS9960_DEFAULT_PGAIN             PGAIN_4X
+#define APDS9960_DEFAULT_AGAIN             AGAIN_4X
+#define APDS9960_DEFAULT_PILT              0      // Low proximity threshold
+#define APDS9960_DEFAULT_PIHT              50     // High proximity threshold
+#define APDS9960_DEFAULT_AILT              0xFFFF // Force interrupt for calibration
+#define APDS9960_DEFAULT_AIHT              0
+#define APDS9960_DEFAULT_PERS              0x11   // 2 consecutive prox or ALS for int.
+#define APDS9960_DEFAULT_CONFIG2           0x01   // No saturation interrupts or LED boost
+#define APDS9960_DEFAULT_CONFIG3           0      // Enable all photodiodes, no SAI
+#define APDS9960_DEFAULT_GPENTH            40     // Threshold for entering gesture mode
+#define APDS9960_DEFAULT_GEXTH             30     // Threshold for exiting gesture mode
+#define APDS9960_DEFAULT_GCONF1            0x40   // 4 gesture events for int., 1 for exit
+#define APDS9960_DEFAULT_GGAIN             GGAIN_4X
+#define APDS9960_DEFAULT_GLDRIVE           LED_DRIVE_100MA
+#define APDS9960_DEFAULT_GWTIME            GWTIME_2_8MS
+#define APDS9960_DEFAULT_GOFFSET           0     // No offset scaling for gesture mode
+#define APDS9960_DEFAULT_GPULSE            0xC9  // 32us, 10 pulses
+#define APDS9960_DEFAULT_GCONF3            0     // All photodiodes active during gesture
+#define APDS9960_DEFAULT_GIEN              0     // Disable gesture interrupts
 
 /* Direction definitions */
 enum {
-  DIR_NONE,
-  DIR_LEFT,
-  DIR_RIGHT,
-  DIR_UP,
-  DIR_DOWN,
-  DIR_NEAR,
-  DIR_FAR,
-  DIR_ALL
+  APDS9960_DIR_NONE,
+  APDS9960_DIR_LEFT,
+  APDS9960_DIR_RIGHT,
+  APDS9960_DIR_UP,
+  APDS9960_DIR_DOWN,
+  APDS9960_DIR_NEAR,
+  APDS9960_DIR_FAR,
+  APDS9960_DIR_ALL
 };
 
 /* State definitions */
 enum {
-  NA_STATE,
-  NEAR_STATE,
-  FAR_STATE,
-  ALL_STATE
+  APDS9960_NA_STATE,
+  APDS9960_NEAR_STATE,
+  APDS9960_FAR_STATE,
+  APDS9960_ALL_STATE
 };
 
 /* Container for gesture data */
-typedef struct apds9660_gesture_data_type {
+typedef struct apds9960_gesture_data_type {
   uint8_t u_data[32];
   uint8_t d_data[32];
   uint8_t l_data[32];
@@ -213,7 +215,7 @@ typedef struct apds9660_gesture_data_type {
   uint8_t total_gestures;
   uint8_t in_threshold;
   uint8_t out_threshold;
-} apds9660_gesture_data_type;
+} apds9960_gesture_data_type;
 
 struct mgos_apds9960 {
   struct mgos_i2c *          i2c;
@@ -221,7 +223,7 @@ struct mgos_apds9960 {
   struct mgos_apds9960_stats stats;
 
   /* Private data for the driver */
-  apds9660_gesture_data_type gesture_data_;
+  apds9960_gesture_data_type gesture_data_;
   int                        gesture_ud_delta_;
   int                        gesture_lr_delta_;
   int                        gesture_ud_count_;
@@ -236,39 +238,39 @@ struct mgos_apds9960 {
 bool mgos_apds9960_i2c_init(void);
 
 /* Private methods */
-/*static*/  void mgos_apds9960_resetGestureParameters(struct mgos_apds9960 *sensor);
-/*static*/  bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor);
-/*static*/  bool mgos_apds9960_decodeGesture(struct mgos_apds9960 *sensor);
+static void mgos_apds9960_resetGestureParameters(struct mgos_apds9960 *sensor);
+static bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor);
+static bool mgos_apds9960_decodeGesture(struct mgos_apds9960 *sensor);
 
-/*static*/  uint8_t mgos_apds9960_getProxIntLowThresh(struct mgos_apds9960 *sensor);
-/*static*/  bool mgos_apds9960_setProxIntLowThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
-/*static*/  uint8_t mgos_apds9960_getProxIntHighThresh(struct mgos_apds9960 *sensor);
-/*static*/  bool mgos_apds9960_setProxIntHighThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
+static uint8_t mgos_apds9960_getProxIntLowThresh(struct mgos_apds9960 *sensor);
+static bool mgos_apds9960_setProxIntLowThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
+static uint8_t mgos_apds9960_getProxIntHighThresh(struct mgos_apds9960 *sensor);
+static bool mgos_apds9960_setProxIntHighThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
 
-/*static*/  uint8_t mgos_apds9960_getLEDBoost(struct mgos_apds9960 *sensor);
-/*static*/  bool mgos_apds9960_setLEDBoost(struct mgos_apds9960 *sensor, uint8_t boost);
+static uint8_t mgos_apds9960_getLEDBoost(struct mgos_apds9960 *sensor);
+static bool mgos_apds9960_setLEDBoost(struct mgos_apds9960 *sensor, uint8_t boost);
 
-/*static*/  uint8_t mgos_apds9960_getProxGainCompEnable(struct mgos_apds9960 *sensor);
-/*static*/  bool mgos_apds9960_setProxGainCompEnable(struct mgos_apds9960 *sensor, uint8_t enable);
-/*static*/  uint8_t mgos_apds9960_getProxPhotoMask(struct mgos_apds9960 *sensor);
-/*static*/  bool mgos_apds9960_setProxPhotoMask(struct mgos_apds9960 *sensor, uint8_t mask);
+static uint8_t mgos_apds9960_getProxGainCompEnable(struct mgos_apds9960 *sensor);
+static bool mgos_apds9960_setProxGainCompEnable(struct mgos_apds9960 *sensor, uint8_t enable);
+static uint8_t mgos_apds9960_getProxPhotoMask(struct mgos_apds9960 *sensor);
+static bool mgos_apds9960_setProxPhotoMask(struct mgos_apds9960 *sensor, uint8_t mask);
 
-/*static*/  uint8_t mgos_apds9960_getGestureEnterThresh(struct mgos_apds9960 *sensor);
-/*static*/  bool mgos_apds9960_setGestureEnterThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
-/*static*/  uint8_t mgos_apds9960_getGestureExitThresh(struct mgos_apds9960 *sensor);
-/*static*/  bool mgos_apds9960_setGestureExitThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
+static uint8_t mgos_apds9960_getGestureEnterThresh(struct mgos_apds9960 *sensor);
+static bool mgos_apds9960_setGestureEnterThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
+static uint8_t mgos_apds9960_getGestureExitThresh(struct mgos_apds9960 *sensor);
+static bool mgos_apds9960_setGestureExitThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
 
-/*static*/  uint8_t mgos_apds9960_getGestureWaitTime(struct mgos_apds9960 *sensor);
-/*static*/  bool mgos_apds9960_setGestureWaitTime(struct mgos_apds9960 *sensor, uint8_t time);
+static uint8_t mgos_apds9960_getGestureWaitTime(struct mgos_apds9960 *sensor);
+static bool mgos_apds9960_setGestureWaitTime(struct mgos_apds9960 *sensor, uint8_t time);
 
-/*static*/  uint8_t mgos_apds9960_getGestureMode(struct mgos_apds9960 *sensor);
-/*static*/  bool mgos_apds9960_setGestureMode(struct mgos_apds9960 *sensor, uint8_t mode);
+static uint8_t mgos_apds9960_getGestureMode(struct mgos_apds9960 *sensor);
+static bool mgos_apds9960_setGestureMode(struct mgos_apds9960 *sensor, uint8_t mode);
 
-/*static*/  bool mgos_apds9960_wireWriteByte(struct mgos_apds9960 *sensor, uint8_t val);
-/*static*/  bool mgos_apds9960_wireWriteDataByte(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t val);
-/*static*/  bool mgos_apds9960_wireWriteDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len);
-/*static*/  bool mgos_apds9960_wireReadDataByte(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val);
-/*static*/  int mgos_apds9960_wireReadDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len);
+static bool mgos_apds9960_wireWriteByte(struct mgos_apds9960 *sensor, uint8_t val);
+static bool mgos_apds9960_wireWriteDataByte(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t val);
+static bool mgos_apds9960_wireWriteDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len);
+static bool mgos_apds9960_wireReadDataByte(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val);
+static int mgos_apds9960_wireReadDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len);
 
 #ifdef __cplusplus
 }
