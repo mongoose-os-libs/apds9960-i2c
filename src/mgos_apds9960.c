@@ -1260,75 +1260,147 @@ bool mgos_apds9960_set_gesture_gain(struct mgos_apds9960 *sensor, uint8_t gain) 
 }
 
 bool mgos_apds9960_get_light_int_low_threshold(struct mgos_apds9960 *sensor, uint16_t *threshold) {
-  if (!sensor) {
+  uint8_t val;
+
+  if (!sensor || !threshold) {
     return false;
   }
-  return false;
+  *threshold = 0;
 
-  (void)threshold;
+  /* Read value from ambient light low threshold, low byte register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_AILTL, &val)) {
+    return false;
+  }
+  *threshold = val;
+
+  /* Read value from ambient light low threshold, high byte register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_AILTH, &val)) {
+    return false;
+  }
+  *threshold += ((uint16_t)val << 8);
+
+  return true;
 }
 
 bool mgos_apds9960_set_light_int_low_threshold(struct mgos_apds9960 *sensor, uint16_t threshold) {
+  uint8_t val_low;
+  uint8_t val_high;
+
   if (!sensor) {
     return false;
   }
-  return false;
 
-  (void)threshold;
+  /* Break 16-bit threshold into 2 8-bit values */
+  val_low  = threshold & 0x00FF;
+  val_high = (threshold & 0xFF00) >> 8;
+
+  /* Write low byte */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_AILTL, val_low)) {
+    return false;
+  }
+
+  /* Write high byte */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_AILTH, val_high)) {
+    return false;
+  }
+
+  return true;
 }
 
 bool mgos_apds9960_get_light_int_high_threshold(struct mgos_apds9960 *sensor, uint16_t *threshold) {
-  if (!sensor) {
+  uint8_t val;
+
+  if (!sensor || !threshold) {
     return false;
   }
-  return false;
 
-  (void)threshold;
+  *threshold = 0;
+
+  /* Read value from ambient light low threshold, low byte register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_AIHTL, &val)) {
+    return false;
+  }
+  *threshold = val;
+
+  /* Read value from ambient light low threshold, high byte register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_AIHTH, &val)) {
+    return false;
+  }
+  *threshold += ((uint16_t)val << 8);
+
+  return true;
 }
 
 bool mgos_apds9960_set_light_int_high_threshold(struct mgos_apds9960 *sensor, uint16_t threshold) {
+  uint8_t val_low;
+  uint8_t val_high;
+
   if (!sensor) {
     return false;
   }
-  return false;
+  /* Break 16-bit threshold into 2 8-bit values */
+  val_low  = threshold & 0x00FF;
+  val_high = (threshold & 0xFF00) >> 8;
 
-  (void)threshold;
+  /* Write low byte */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_AIHTL, val_low)) {
+    return false;
+  }
+
+  /* Write high byte */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_AIHTH, val_high)) {
+    return false;
+  }
+
+  return true;
 }
 
 bool mgos_apds9960_get_proximity_int_low_threshold(struct mgos_apds9960 *sensor, uint8_t *threshold) {
-  if (!sensor) {
+  if (!sensor || !threshold) {
     return false;
   }
-  return false;
+  /* Read value from proximity low threshold register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PILT, threshold)) {
+    return false;
+  }
 
-  (void)threshold;
+  return true;
 }
 
 bool mgos_apds9960_set_proximity_int_low_threshold(struct mgos_apds9960 *sensor, uint8_t threshold) {
   if (!sensor) {
     return false;
   }
-  return false;
+  /* Write threshold value to register */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_PILT, threshold)) {
+    return false;
+  }
 
-  (void)threshold;
+  return true;
 }
 
 bool mgos_apds9960_get_proximity_int_high_threshold(struct mgos_apds9960 *sensor, uint8_t *threshold) {
-  if (!sensor) {
+  if (!sensor || !threshold) {
     return false;
   }
-  return false;
+  /* Read value from proximity high threshold register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PIHT, threshold)) {
+    return false;
+  }
 
-  (void)threshold;
+  return true;
 }
 
 bool mgos_apds9960_set_proximity_int_high_threshold(struct mgos_apds9960 *sensor, uint8_t threshold) {
   if (!sensor) {
     return false;
   }
-  return false;
+  /* Write threshold value to register */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_PIHT, threshold)) {
+    return false;
+  }
 
-  (void)threshold;
+  return true;
 }
 
 uint8_t mgos_apds9960_get_ambient_light_int_enable(struct mgos_apds9960 *sensor) {
