@@ -1533,17 +1533,29 @@ bool mgos_apds9960_set_gesture_int_enable(struct mgos_apds9960 *sensor, uint8_t 
 }
 
 bool mgos_apds9960_clear_ambientlight_int(struct mgos_apds9960 *sensor) {
+  uint8_t val;
+
   if (!sensor) {
     return false;
   }
-  return false;
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_AICLEAR, &val)) {
+    return false;
+  }
+
+  return true;
 }
 
 bool mgos_apds9960_clear_proximity_int(struct mgos_apds9960 *sensor) {
+  uint8_t val;
+
   if (!sensor) {
     return false;
   }
-  return false;
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PICLEAR, &val)) {
+    return false;
+  }
+
+  return true;
 }
 
 bool mgos_apds9960_read_ambient_light(struct mgos_apds9960 *sensor, uint16_t *val) {
