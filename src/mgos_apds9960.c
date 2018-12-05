@@ -1661,15 +1661,146 @@ bool mgos_apds9960_read_proximity(struct mgos_apds9960 *sensor, uint8_t *val) {
 }
 
 bool mgos_apds9960_is_gesture_available(struct mgos_apds9960 *sensor) {
+  uint8_t val;
+
   if (!sensor) {
     return false;
   }
-  return false;
+  /* Read value from GSTATUS register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GSTATUS, &val)) {
+    return APDS9960_ERROR;
+  }
+
+  /* Shift and mask out GVALID bit */
+  val &= APDS9960_GVALID;
+
+  /* Return true/false based on GVALID bit */
+  return val == 1;
 }
 
 int mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor) {
+  uint8_t fifo_level = 0;
+  int     bytes_read = 0;
+  uint8_t fifo_data[128];
+  uint8_t gstatus;
+  int     motion;
+  int     i;
+
   if (!sensor) {
     return -1;
+  }
+  /* Make sure that power and gesture is on and data is valid */
+  if (!mgos_apds9960_is_gesture_available(sensor) || !(mgos_apds9960_get_mode(sensor) & 0b01000001)) {
+    return APDS9960_DIR_NONE;
+  }
+  /* Keep looping as long as gesture data is valid */
+  while (1) {
+    /* Wait some time to collect next batch of FIFO data */
+    mgos_msleep(APDS9960_FIFO_PAUSE_TIME);
+
+    /* Get the contents of the STATUS register. Is data still valid? */
+    if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GSTATUS, &gstatus)) {
+      return APDS9960_ERROR;
+    }
+
+    /* If we have valid data, read in FIFO */
+    if ((gstatus & APDS9960_GVALID) == APDS9960_GVALID) {
+      /* Read the current FIFO level */
+      if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GFLVL, &fifo_level)) {
+        return APDS9960_ERROR;
+      }
+
+#if DEBUG
+      LOG(LL_DEBUG, ("FIFO Level: %d", fifo_level));
+
+      /*
+       * Serial.print("FIFO Level: ");
+       * Serial.println(fifo_level);
+       */
+#endif
+
+      /* If there's stuff in the FIFO, read it into our data block */
+      if (fifo_level > 0) {
+        bytes_read = mgos_apds9960_wireReadDataBlock(sensor, APDS9960_GFIFO_U,
+                                                     (uint8_t *)fifo_data,
+                                                     (fifo_level * 4));
+        if (bytes_read == -1) {
+          return APDS9960_ERROR;
+        }
+#if DEBUG
+        LOG(LL_DEBUG, ("FIFO Dump:"));
+        for (i = 0; i < bytes_read; i++) {
+          LOG(LL_DEBUG, ("%d", fifo_data[i]));
+        }
+
+        /*
+         * Serial.print("FIFO Dump: ");
+         * for ( i = 0; i < bytes_read; i++ ) {
+         *  Serial.print(fifo_data[i]);
+         *  Serial.print(" ");
+         * }
+         * Serial.println();
+         */
+#endif
+
+        /* If at least 1 set of data, sort the data into U/D/L/R */
+        if (bytes_read >= 4) {
+          for (i = 0; i < bytes_read; i += 4) {
+            sensor->gesture_data_.u_data[sensor->gesture_data_.index] = fifo_data[i + 0];
+            sensor->gesture_data_.d_data[sensor->gesture_data_.index] = fifo_data[i + 1];
+            sensor->gesture_data_.l_data[sensor->gesture_data_.index] = fifo_data[i + 2];
+            sensor->gesture_data_.r_data[sensor->gesture_data_.index] = fifo_data[i + 3];
+            sensor->gesture_data_.index++;
+            sensor->gesture_data_.total_gestures++;
+          }
+
+#if DEBUG
+          LOG(LL_DEBUG, ("Up Data:"));
+          for (i = 0; i < sensor->gesture_data_.total_gestures; i++) {
+            LOG(LL_DEBUG, ("%d", sensor->gesture_data_.u_data[i]));
+          }
+
+          /*
+           * Serial.print("Up Data: ");
+           * for ( i = 0; i < sensor->gesture_data_.total_gestures; i++ ) {
+           *  Serial.print(sensor->gesture_data_.u_data[i]);
+           *  Serial.print(" ");
+           * }
+           * Serial.println();
+           */
+#endif
+
+          /* Filter and process gesture data. Decode near/far state */
+          if (mgos_apds9960_processGestureData(sensor)) {
+            if (mgos_apds9960_decodeGesture(sensor)) {
+              //***TODO: U-Turn Gestures
+#if DEBUG
+              //Serial.println(gesture_motion_);
+#endif
+            }
+          }
+
+          /* Reset data */
+          sensor->gesture_data_.index          = 0;
+          sensor->gesture_data_.total_gestures = 0;
+        }
+      }
+    } else {
+      /* Determine best guessed gesture and clean up */
+      mgos_msleep(APDS9960_FIFO_PAUSE_TIME);
+      mgos_apds9960_decodeGesture(sensor);
+      motion = sensor->gesture_motion_;
+#if DEBUG
+      LOG(LL_DEBUG, ("END: %d", sensor->gesture_motion_));
+
+      /*
+       * Serial.print("END: ");
+       * Serial.println(sensor->gesture_motion_);
+       */
+#endif
+      mgos_apds9960_resetGestureParameters(sensor);
+      return motion;
+    }
   }
   return -1;
 }
