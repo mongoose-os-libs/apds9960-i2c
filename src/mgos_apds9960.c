@@ -1404,51 +1404,132 @@ bool mgos_apds9960_set_proximity_int_high_threshold(struct mgos_apds9960 *sensor
 }
 
 uint8_t mgos_apds9960_get_ambient_light_int_enable(struct mgos_apds9960 *sensor) {
+  uint8_t val;
+
   if (!sensor) {
     return 0;
   }
-  return 0;
+
+  /* Read value from ENABLE register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
+    return APDS9960_ERROR;
+  }
+
+  /* Shift and mask out AIEN bit */
+  val = (val >> 4) & 0b00000001;
+
+  return val;
 }
 
 bool mgos_apds9960_set_ambient_light_int_enable(struct mgos_apds9960 *sensor, uint8_t enable) {
+  uint8_t val;
+
   if (!sensor) {
     return false;
   }
-  return false;
+  /* Read value from ENABLE register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
+    return false;
+  }
 
-  (void)enable;
+  /* Set bits in register to given value */
+  enable &= 0b00000001;
+  enable  = enable << 4;
+  val    &= 0b11101111;
+  val    |= enable;
+
+  /* Write register value back into ENABLE register */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_ENABLE, val)) {
+    return false;
+  }
+
+  return true;
 }
 
 uint8_t mgos_apds9960_get_proximity_int_enable(struct mgos_apds9960 *sensor) {
+  uint8_t val;
+
   if (!sensor) {
     return 0;
   }
-  return 0;
+
+  /* Read value from ENABLE register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
+    return APDS9960_ERROR;
+  }
+
+  /* Shift and mask out PIEN bit */
+  val = (val >> 5) & 0b00000001;
+
+  return val;
 }
 
 bool mgos_apds9960_set_proximity_int_enable(struct mgos_apds9960 *sensor, uint8_t enable) {
+  uint8_t val;
+
   if (!sensor) {
     return false;
   }
-  return false;
+  /* Read value from ENABLE register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
+    return false;
+  }
 
-  (void)enable;
+  /* Set bits in register to given value */
+  enable &= 0b00000001;
+  enable  = enable << 5;
+  val    &= 0b11011111;
+  val    |= enable;
+
+  /* Write register value back into ENABLE register */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_ENABLE, val)) {
+    return false;
+  }
+
+  return true;
 }
 
 uint8_t mgos_apds9960_get_gesture_int_enable(struct mgos_apds9960 *sensor) {
+  uint8_t val;
+
   if (!sensor) {
     return 0;
   }
-  return 0;
+
+  /* Read value from ENABLE register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
+    return APDS9960_ERROR;
+  }
+
+  /* Shift and mask out GIEN bit */
+  val = (val >> 1) & 0b00000001;
+
+  return val;
 }
 
 bool mgos_apds9960_set_gesture_int_enable(struct mgos_apds9960 *sensor, uint8_t enable) {
+  uint8_t val;
+
   if (!sensor) {
     return false;
   }
-  return false;
+  /* Read value from GCONF4 register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF4, &val)) {
+    return false;
+  }
 
-  (void)enable;
+  /* Set bits in register to given value */
+  enable &= 0b00000001;
+  enable  = enable << 1;
+  val    &= 0b11111101;
+  val    |= enable;
+
+  /* Write register value back into GCONF4 register */
+  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GCONF4, val)) {
+    return false;
+  }
+
+  return true;
 }
 
 bool mgos_apds9960_clear_ambientlight_int(struct mgos_apds9960 *sensor) {
