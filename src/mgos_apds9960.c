@@ -1559,39 +1559,95 @@ bool mgos_apds9960_clear_proximity_int(struct mgos_apds9960 *sensor) {
 }
 
 bool mgos_apds9960_read_ambient_light(struct mgos_apds9960 *sensor, uint16_t *val) {
-  if (!sensor) {
+  uint8_t val_byte;
+
+  if (!sensor || !val) {
     return false;
   }
-  return false;
+  *val = 0;
 
-  (void)val;
+  /* Read value from clear channel, low byte register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CDATAL, &val_byte)) {
+    return false;
+  }
+  *val = val_byte;
+
+  /* Read value from clear channel, high byte register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CDATAH, &val_byte)) {
+    return false;
+  }
+  *val += ((uint16_t)val_byte << 8);
+
+  return true;
 }
 
 bool mgos_apds9960_read_red_light(struct mgos_apds9960 *sensor, uint16_t *val) {
-  if (!sensor) {
+  uint8_t val_byte;
+
+  if (!sensor || !val) {
     return false;
   }
-  return false;
+  *val = 0;
 
-  (void)val;
+  /* Read value from clear channel, low byte register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_RDATAL, &val_byte)) {
+    return false;
+  }
+  *val = val_byte;
+
+  /* Read value from clear channel, high byte register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_RDATAH, &val_byte)) {
+    return false;
+  }
+  *val += ((uint16_t)val_byte << 8);
+
+  return true;
 }
 
 bool mgos_apds9960_read_green_light(struct mgos_apds9960 *sensor, uint16_t *val) {
-  if (!sensor) {
+  uint8_t val_byte;
+
+  if (!sensor || !val) {
     return false;
   }
-  return false;
+  *val = 0;
 
-  (void)val;
+  /* Read value from clear channel, low byte register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GDATAL, &val_byte)) {
+    return false;
+  }
+  *val = val_byte;
+
+  /* Read value from clear channel, high byte register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GDATAH, &val_byte)) {
+    return false;
+  }
+  *val += ((uint16_t)val_byte << 8);
+
+  return true;
 }
 
 bool mgos_apds9960_read_blue_light(struct mgos_apds9960 *sensor, uint16_t *val) {
-  if (!sensor) {
+  uint8_t val_byte;
+
+  if (!sensor || !val) {
     return false;
   }
-  return false;
+  *val = 0;
 
-  (void)val;
+  /* Read value from clear channel, low byte register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_BDATAL, &val_byte)) {
+    return false;
+  }
+  *val = val_byte;
+
+  /* Read value from clear channel, high byte register */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_BDATAH, &val_byte)) {
+    return false;
+  }
+  *val += ((uint16_t)val_byte << 8);
+
+  return true;
 }
 
 bool mgos_apds9960_read_proximity(struct mgos_apds9960 *sensor, uint8_t *val) {
