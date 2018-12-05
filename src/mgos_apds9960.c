@@ -1651,12 +1651,13 @@ bool mgos_apds9960_read_blue_light(struct mgos_apds9960 *sensor, uint16_t *val) 
 }
 
 bool mgos_apds9960_read_proximity(struct mgos_apds9960 *sensor, uint8_t *val) {
-  if (!sensor) {
+  if (!sensor || !val) {
     return false;
   }
-  return false;
-
-  (void)val;
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PDATA, val)) {
+    return false;
+  }
+  return true;
 }
 
 bool mgos_apds9960_is_gesture_available(struct mgos_apds9960 *sensor) {
