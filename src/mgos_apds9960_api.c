@@ -302,23 +302,21 @@ bool mgos_apds9960_decodeGesture(struct mgos_apds9960 *sensor) {
   return true;
 }
 
-uint8_t mgos_apds9960_getLEDBoost(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
+bool mgos_apds9960_get_led_boost(struct mgos_apds9960 *sensor, uint8_t *boost) {
+  if (!sensor || !boost) {
+    return false;
   }
 
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG2, &val)) {
-    return APDS9960_ERROR;
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG2, boost)) {
+    return false;
   }
 
-  val = (val >> 4) & 0b00000011;
+  *boost = (*boost >> 4) & 0b00000011;
 
-  return val;
+  return true;
 }
 
-bool mgos_apds9960_setLEDBoost(struct mgos_apds9960 *sensor, uint8_t boost) {
+bool mgos_apds9960_set_led_boost(struct mgos_apds9960 *sensor, uint8_t boost) {
   uint8_t val;
 
   if (!sensor) {
@@ -341,24 +339,25 @@ bool mgos_apds9960_setLEDBoost(struct mgos_apds9960 *sensor, uint8_t boost) {
   return true;
 }
 
-uint8_t mgos_apds9960_getProxGainCompEnable(struct mgos_apds9960 *sensor) {
+bool mgos_apds9960_get_proximity_gain_comp_enable(struct mgos_apds9960 *sensor, bool *enabled) {
   uint8_t val;
 
-  if (!sensor) {
-    return 0;
+  if (!sensor || !enabled) {
+    return false;
   }
 
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG3, &val)) {
-    return APDS9960_ERROR;
+    return false;
   }
 
-  val = (val >> 5) & 0b00000001;
+  *enabled = (val >> 5) & 0b00000001;
 
-  return val;
+  return true;
 }
 
-bool mgos_apds9960_setProxGainCompEnable(struct mgos_apds9960 *sensor, uint8_t enable) {
+bool mgos_apds9960_set_proximity_gain_comp_enable(struct mgos_apds9960 *sensor, bool enable) {
   uint8_t val;
+  uint8_t enable_val;
 
   if (!sensor) {
     return false;
@@ -368,10 +367,9 @@ bool mgos_apds9960_setProxGainCompEnable(struct mgos_apds9960 *sensor, uint8_t e
     return false;
   }
 
-  enable &= 0b00000001;
-  enable  = enable << 5;
-  val    &= 0b11011111;
-  val    |= enable;
+  enable_val = enable << 5;
+  val       &= 0b11011111;
+  val       |= enable_val;
 
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONFIG3, val)) {
     return false;
@@ -380,23 +378,20 @@ bool mgos_apds9960_setProxGainCompEnable(struct mgos_apds9960 *sensor, uint8_t e
   return true;
 }
 
-uint8_t mgos_apds9960_getProxPhotoMask(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
+bool mgos_apds9960_get_proximity_photomask(struct mgos_apds9960 *sensor, uint8_t *mask) {
+  if (!sensor || !mask) {
+    return false;
   }
 
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG3, &val)) {
-    return APDS9960_ERROR;
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG3, mask)) {
+    return false;
   }
 
-  val &= 0b00001111;
-
-  return val;
+  *mask &= 0b00001111;
+  return true;
 }
 
-bool mgos_apds9960_setProxPhotoMask(struct mgos_apds9960 *sensor, uint8_t mask) {
+bool mgos_apds9960_set_proximity_photomask(struct mgos_apds9960 *sensor, uint8_t mask) {
   uint8_t val;
 
   if (!sensor) {
@@ -418,21 +413,19 @@ bool mgos_apds9960_setProxPhotoMask(struct mgos_apds9960 *sensor, uint8_t mask) 
   return true;
 }
 
-uint8_t mgos_apds9960_getGestureEnterThresh(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
+bool mgos_apds9960_get_gesture_enter_threshold(struct mgos_apds9960 *sensor, uint8_t *threshold) {
+  if (!sensor || threshold) {
+    return false;
   }
 
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GPENTH, &val)) {
-    val = 0;
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GPENTH, threshold)) {
+    return false;
   }
 
-  return val;
+  return true;
 }
 
-bool mgos_apds9960_setGestureEnterThresh(struct mgos_apds9960 *sensor, uint8_t threshold) {
+bool mgos_apds9960_set_gesture_enter_threshold(struct mgos_apds9960 *sensor, uint8_t threshold) {
   if (!sensor) {
     return false;
   }
@@ -443,21 +436,19 @@ bool mgos_apds9960_setGestureEnterThresh(struct mgos_apds9960 *sensor, uint8_t t
   return true;
 }
 
-uint8_t mgos_apds9960_getGestureExitThresh(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
+bool mgos_apds9960_get_gesture_exit_threshold(struct mgos_apds9960 *sensor, uint8_t *threshold) {
+  if (!sensor || !threshold) {
+    return false;
   }
 
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GEXTH, &val)) {
-    val = 0;
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GEXTH, threshold)) {
+    return false;
   }
 
-  return val;
+  return true;
 }
 
-bool mgos_apds9960_setGestureExitThresh(struct mgos_apds9960 *sensor, uint8_t threshold) {
+bool mgos_apds9960_set_gesture_exit_threshold(struct mgos_apds9960 *sensor, uint8_t threshold) {
   if (!sensor) {
     return false;
   }
@@ -468,23 +459,20 @@ bool mgos_apds9960_setGestureExitThresh(struct mgos_apds9960 *sensor, uint8_t th
   return true;
 }
 
-uint8_t mgos_apds9960_getGestureWaitTime(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
+bool mgos_apds9960_get_gesture_wait_time(struct mgos_apds9960 *sensor, uint8_t *time) {
+  if (!sensor || !time) {
+    return false;
   }
 
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, &val)) {
-    return APDS9960_ERROR;
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, time)) {
+    return false;
   }
 
-  val &= 0b00000111;
-
-  return val;
+  *time &= 0b00000111;
+  return true;
 }
 
-bool mgos_apds9960_setGestureWaitTime(struct mgos_apds9960 *sensor, uint8_t time) {
+bool mgos_apds9960_set_gesture_wait_time(struct mgos_apds9960 *sensor, uint8_t time) {
   uint8_t val;
 
   if (!sensor) {
@@ -506,23 +494,20 @@ bool mgos_apds9960_setGestureWaitTime(struct mgos_apds9960 *sensor, uint8_t time
   return true;
 }
 
-uint8_t mgos_apds9960_getGestureMode(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
+bool mgos_apds9960_get_gesture_mode(struct mgos_apds9960 *sensor, uint8_t *mode) {
+  if (!sensor || !mode) {
+    return false;
   }
 
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF4, &val)) {
-    return APDS9960_ERROR;
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF4, mode)) {
+    return false;
   }
 
-  val &= 0b00000001;
-
-  return val;
+  *mode &= 0b00000001;
+  return true;
 }
 
-bool mgos_apds9960_setGestureMode(struct mgos_apds9960 *sensor, uint8_t mode) {
+bool mgos_apds9960_set_gesture_mode(struct mgos_apds9960 *sensor, uint8_t mode) {
   uint8_t val;
 
   if (!sensor) {
@@ -605,10 +590,10 @@ bool mgos_apds9960_init(struct mgos_apds9960 *sensor) {
   }
 
   // Set default values for gesture sense registers
-  if (!mgos_apds9960_setGestureEnterThresh(sensor, APDS9960_DEFAULT_GPENTH)) {
+  if (!mgos_apds9960_set_gesture_enter_threshold(sensor, APDS9960_DEFAULT_GPENTH)) {
     return false;
   }
-  if (!mgos_apds9960_setGestureExitThresh(sensor, APDS9960_DEFAULT_GEXTH)) {
+  if (!mgos_apds9960_set_gesture_exit_threshold(sensor, APDS9960_DEFAULT_GEXTH)) {
     return false;
   }
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GCONF1, APDS9960_DEFAULT_GCONF1)) {
@@ -620,7 +605,7 @@ bool mgos_apds9960_init(struct mgos_apds9960 *sensor) {
   if (!mgos_apds9960_set_gesture_led_drive(sensor, APDS9960_DEFAULT_GLDRIVE)) {
     return false;
   }
-  if (!mgos_apds9960_setGestureWaitTime(sensor, APDS9960_DEFAULT_GWTIME)) {
+  if (!mgos_apds9960_set_gesture_wait_time(sensor, APDS9960_DEFAULT_GWTIME)) {
     return false;
   }
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GOFFSET_U, APDS9960_DEFAULT_GOFFSET)) {
@@ -808,13 +793,13 @@ bool mgos_apds9960_enable_gesture_sensor(struct mgos_apds9960 *sensor, bool inte
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_PPULSE, APDS9960_DEFAULT_GESTURE_PPULSE)) {
     return false;
   }
-  if (!mgos_apds9960_setLEDBoost(sensor, APDS9960_LED_BOOST_300)) {
+  if (!mgos_apds9960_set_led_boost(sensor, APDS9960_LED_BOOST_300)) {
     return false;
   }
   if (!mgos_apds9960_set_gesture_int_enable(sensor, interrupts)) {
     return false;
   }
-  if (!mgos_apds9960_setGestureMode(sensor, 1)) {
+  if (!mgos_apds9960_set_gesture_mode(sensor, 1)) {
     return false;
   }
   if (!mgos_apds9960_enable(sensor)) {
@@ -841,7 +826,7 @@ bool mgos_apds9960_disable_gesture_sensor(struct mgos_apds9960 *sensor) {
   if (!mgos_apds9960_set_gesture_int_enable(sensor, 0)) {
     return false;
   }
-  if (!mgos_apds9960_setGestureMode(sensor, 0)) {
+  if (!mgos_apds9960_set_gesture_mode(sensor, 0)) {
     return false;
   }
   if (!mgos_apds9960_set_mode(sensor, APDS9960_GESTURE, 0)) {

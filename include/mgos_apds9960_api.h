@@ -18,6 +18,10 @@
 #include "mgos.h"
 #include "mgos_i2c.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct mgos_apds9960;
 
 bool mgos_apds9960_init(struct mgos_apds9960 *sensor);
@@ -27,6 +31,8 @@ uint8_t mgos_apds9960_get_mode(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_set_mode(struct mgos_apds9960 *sensor, uint8_t mode, uint8_t enable);
 uint8_t mgos_apds9960_get_led_drive(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_set_led_drive(struct mgos_apds9960 *sensor, uint8_t drive);
+bool mgos_apds9960_get_led_boost(struct mgos_apds9960 *sensor, uint8_t *boost);
+bool mgos_apds9960_set_led_boost(struct mgos_apds9960 *sensor, uint8_t boost);
 
 /* Light sensor API calls */
 bool mgos_apds9960_enable_light_sensor(struct mgos_apds9960 *sensor, bool interrupts);
@@ -58,6 +64,10 @@ bool mgos_apds9960_set_proximity_int_high_threshold(struct mgos_apds9960 *sensor
 uint8_t mgos_apds9960_get_proximity_int_enable(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_set_proximity_int_enable(struct mgos_apds9960 *sensor, uint8_t enable);
 bool mgos_apds9960_clear_proximity_int(struct mgos_apds9960 *sensor);
+bool mgos_apds9960_get_proximity_gain_comp_enable(struct mgos_apds9960 *sensor, bool *enabled);
+bool mgos_apds9960_set_proximity_gain_comp_enable(struct mgos_apds9960 *sensor, bool enable);
+bool mgos_apds9960_get_proximity_photomask(struct mgos_apds9960 *sensor, uint8_t *mask);
+bool mgos_apds9960_set_proximity_photomask(struct mgos_apds9960 *sensor, uint8_t mask);
 
 
 /* Gesture sensor API calls */
@@ -69,4 +79,15 @@ uint8_t mgos_apds9960_get_gesture_gain(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_set_gesture_gain(struct mgos_apds9960 *sensor, uint8_t gain);
 uint8_t mgos_apds9960_get_gesture_int_enable(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_set_gesture_int_enable(struct mgos_apds9960 *sensor, uint8_t enable);
+bool mgos_apds9960_get_gesture_enter_threshold(struct mgos_apds9960 *sensor, uint8_t *threshold);
+bool mgos_apds9960_set_gesture_enter_threshold(struct mgos_apds9960 *sensor, uint8_t threshold);
+bool mgos_apds9960_get_gesture_exit_threshold(struct mgos_apds9960 *sensor, uint8_t *threshold);
+bool mgos_apds9960_set_gesture_exit_threshold(struct mgos_apds9960 *sensor, uint8_t threshold);
+bool mgos_apds9960_get_gesture_wait_time(struct mgos_apds9960 *sensor, uint8_t *time);
+bool mgos_apds9960_set_gesture_wait_time(struct mgos_apds9960 *sensor, uint8_t time);
+bool mgos_apds9960_get_gesture_mode(struct mgos_apds9960 *sensor, uint8_t *mode);
+bool mgos_apds9960_set_gesture_mode(struct mgos_apds9960 *sensor, uint8_t mode);
 
+#ifdef __cplusplus
+}
+#endif
