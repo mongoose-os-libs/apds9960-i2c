@@ -16,22 +16,11 @@
 
 #include "mgos_apds9960_internal.h"
 
-static bool is_apds9960(struct mgos_i2c *i2c, uint8_t i2caddr) {
-  return false;
-
-  (void)i2c;
-  (void)i2caddr;
-}
-
 struct mgos_apds9960 *mgos_apds9960_create(struct mgos_i2c *i2c, uint8_t i2caddr) {
-  struct mgos_apds9960 *sensor;
+  struct mgos_apds9960 *sensor = NULL;
+  uint8_t id = 0;
 
   if (!i2c) {
-    return NULL;
-  }
-
-  if (!is_apds9960(i2c, i2caddr)) {
-    LOG(LL_ERROR, ("Failed to create APDS9960 at I2C 0x%02x", i2caddr));
     return NULL;
   }
 
@@ -53,7 +42,25 @@ struct mgos_apds9960 *mgos_apds9960_create(struct mgos_i2c *i2c, uint8_t i2caddr
   sensor->gesture_motion_     = APDS9960_DIR_NONE;
   mgos_apds9960_resetGestureParameters(sensor);
 
-  LOG(LL_INFO, ("APDS9960 created at I2C 0x%02x", i2caddr));
+  /* Read ID register and check against known values for APDS-9960 */
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ID, &id)) {
+    LOG(LL_ERROR, ("Cannot read from device at I2C 0x%02x", sensor->i2caddr));
+    free(sensor);
+    return false;
+  }
+  if (!(id == APDS9960_ID_1 || id == APDS9960_ID_2)) {
+    LOG(LL_ERROR, ("Device at I2C 0x%02x does not identify as an APDS9960", sensor->i2caddr));
+    free(sensor);
+    return false;
+  }
+
+  if (!mgos_apds9960_init(sensor)) {
+    LOG(LL_ERROR, ("Could not initialize APDS9960 at I2C 0x%02x", sensor->i2caddr));
+    free(sensor);
+    return false;
+  }
+
+  LOG(LL_INFO, ("APDS9960 initialized at I2C 0x%02x", sensor->i2caddr));
   return sensor;
 }
 
@@ -61,6 +68,7 @@ void mgos_apds9960_destroy(struct mgos_apds9960 **sensor) {
   if (!*sensor) {
     return;
   }
+  mgos_apds9960_disable(*sensor);
 
   free(*sensor);
   *sensor = NULL;
@@ -741,22 +749,12 @@ static int mgos_apds9960_wireReadDataBlock(struct mgos_apds9960 *sensor, uint8_t
 }
 
 bool mgos_apds9960_init(struct mgos_apds9960 *sensor) {
-  uint8_t id;
-
   if (!sensor) {
     return false;
   }
 
-  /* Read ID register and check against known values for APDS-9960 */
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ID, &id)) {
-    return false;
-  }
-  if (!(id == APDS9960_ID_1 || id == APDS9960_ID_2)) {
-    return false;
-  }
-
-  /* Set ENABLE register to 0 (disable all features) */
-  if (!mgos_apds9960_set_mode(sensor, APDS9960_ALL, APDS9960_OFF)) {
+  /* Reset device first: power down and disable all features */
+  if (!mgos_apds9960_disable(sensor)) {
     return false;
   }
 
@@ -858,14 +856,20 @@ bool mgos_apds9960_enable(struct mgos_apds9960 *sensor) {
   if (!sensor) {
     return false;
   }
-  return mgos_apds9960_set_mode(sensor, APDS9960_POWER, 1);
+  return mgos_apds9960_set_mode(sensor, APDS9960_POWER, APDS9960_ON);
 }
 
 bool mgos_apds9960_disable(struct mgos_apds9960 *sensor) {
   if (!sensor) {
     return false;
   }
-  return mgos_apds9960_set_mode(sensor, APDS9960_POWER, 0);
+
+  /* Set ENABLE register to 0 (disable all features) */
+  if (!mgos_apds9960_set_mode(sensor, APDS9960_ALL, APDS9960_OFF)) {
+    return false;
+  }
+
+  return mgos_apds9960_set_mode(sensor, APDS9960_POWER, APDS9960_OFF);
 }
 
 uint8_t mgos_apds9960_get_mode(struct mgos_apds9960 *sensor) {
