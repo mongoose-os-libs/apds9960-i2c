@@ -81,6 +81,7 @@ bool mgos_apds9960_get_gesture_gain(struct mgos_apds9960 *sensor, uint8_t *gain)
 bool mgos_apds9960_set_gesture_gain(struct mgos_apds9960 *sensor, uint8_t gain);
 bool mgos_apds9960_get_gesture_int_enable(struct mgos_apds9960 *sensor, bool *enabled);
 bool mgos_apds9960_set_gesture_int_enable(struct mgos_apds9960 *sensor, bool enable);
+bool mgos_apds9960_get_gesture_int(struct mgos_apds9960 *sensor, bool *firing);
 bool mgos_apds9960_get_gesture_enter_threshold(struct mgos_apds9960 *sensor, uint8_t *threshold);
 bool mgos_apds9960_set_gesture_enter_threshold(struct mgos_apds9960 *sensor, uint8_t threshold);
 bool mgos_apds9960_get_gesture_exit_threshold(struct mgos_apds9960 *sensor, uint8_t *threshold);
@@ -89,6 +90,7 @@ bool mgos_apds9960_get_gesture_wait_time(struct mgos_apds9960 *sensor, uint8_t *
 bool mgos_apds9960_set_gesture_wait_time(struct mgos_apds9960 *sensor, uint8_t time);
 bool mgos_apds9960_get_gesture_mode(struct mgos_apds9960 *sensor, uint8_t *mode);
 bool mgos_apds9960_set_gesture_mode(struct mgos_apds9960 *sensor, uint8_t mode);
+bool mgos_apds9960_get_gesture_fifo(struct mgos_apds9960 *sensor, uint8_t *fifo, uint8_t *bytes_read);
 
 #ifdef __cplusplus
 }

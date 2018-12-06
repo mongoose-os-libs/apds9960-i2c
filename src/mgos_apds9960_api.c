@@ -1213,6 +1213,21 @@ bool mgos_apds9960_set_proximity_int_enable(struct mgos_apds9960 *sensor, bool e
   return true;
 }
 
+bool mgos_apds9960_get_gesture_int(struct mgos_apds9960 *sensor, bool *firing) {
+  uint8_t val;
+
+  if (!sensor || !firing) {
+    return false;
+  }
+
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_STATUS, &val)) {
+    return false;
+  }
+
+  *firing = (val >> 2) & 0b00000001;
+  return true;
+}
+
 bool mgos_apds9960_get_gesture_int_enable(struct mgos_apds9960 *sensor, bool *enabled) {
   uint8_t val;
 
@@ -1392,6 +1407,33 @@ bool mgos_apds9960_read_blue_light(struct mgos_apds9960 *sensor, uint16_t *val) 
 }
 
 /* End sparkfun import */
+
+// Fifo size is 32 tuples of 4 bytes -- so *fifo must be at least 128 bytes!
+bool mgos_apds9960_get_gesture_fifo(struct mgos_apds9960 *sensor, uint8_t *fifo, uint8_t *bytes_read) {
+  uint8_t fifo_level;
+  int     readlen;
+
+  if (!sensor || !fifo || !bytes_read) {
+    return false;
+  }
+  if (!mgos_apds9960_is_gesture_available(sensor)) {
+    return false;
+  }
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GFLVL, &fifo_level)) {
+    return false;
+  }
+  if (fifo_level == 0) {
+    return false;
+  }
+
+  readlen = mgos_apds9960_wireReadDataBlock(sensor, APDS9960_GFIFO_U, fifo, (fifo_level * 4));
+  LOG(LL_INFO, ("fifo_level=%u bytes_read=%d", fifo_level, readlen));
+  if (readlen < 1) {
+    return false;
+  }
+  *bytes_read = readlen;
+  return true;
+}
 
 bool mgos_apds9960_i2c_init(void) {
   return true;

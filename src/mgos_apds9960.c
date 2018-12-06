@@ -131,7 +131,7 @@ bool mgos_apds9960_is_gesture_available(struct mgos_apds9960 *sensor) {
   }
 
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GSTATUS, &val)) {
-    return APDS9960_ERROR;
+    return false;
   }
 
   val &= APDS9960_GVALID;
@@ -317,7 +317,7 @@ bool mgos_apds9960_set_callback_proximity(struct mgos_apds9960 *sensor, uint16_t
   return true;
 }
 
-bool mgos_apds9960_set_callback_gesture(struct mgos_apds9960 *sensor, uint16_t enter_threshold, uint16_t exit_threshold, uint8_t wait_time, mgos_apds9960_gesture_event_t handler) {
+bool mgos_apds9960_set_callback_gesture(struct mgos_apds9960 *sensor, mgos_apds9960_gesture_event_t handler) {
   if (!sensor) {
     return false;
   }
@@ -325,15 +325,18 @@ bool mgos_apds9960_set_callback_gesture(struct mgos_apds9960 *sensor, uint16_t e
   if (!mgos_apds9960_enable_gesture_sensor(sensor)) {
     return false;
   }
-  if (!mgos_apds9960_set_gesture_enter_threshold(sensor, enter_threshold)) {
-    return false;
-  }
-  if (!mgos_apds9960_set_gesture_exit_threshold(sensor, exit_threshold)) {
-    return false;
-  }
-  if (!mgos_apds9960_set_gesture_wait_time(sensor, wait_time)) {
-    return false;
-  }
+
+  /*
+   * if (!mgos_apds9960_set_gesture_enter_threshold(sensor, enter_threshold)) {
+   * return false;
+   * }
+   * if (!mgos_apds9960_set_gesture_exit_threshold(sensor, exit_threshold)) {
+   * return false;
+   * }
+   * if (!mgos_apds9960_set_gesture_wait_time(sensor, wait_time)) {
+   * return false;
+   * }
+   */
   if (!mgos_apds9960_set_gesture_int_enable(sensor, true)) {
     return false;
   }
@@ -346,6 +349,7 @@ void mgos_apds9960_irq(int pin, void *arg) {
   struct mgos_apds9960 *sensor = (struct mgos_apds9960 *)arg;
   bool light_firing            = false;
   bool proximity_firing        = false;
+  bool gesture_firing          = false;
 
   if (!arg) {
     LOG(LL_ERROR, ("Interrupt fired for APDS9960, but no sensor to poll"));
@@ -353,7 +357,8 @@ void mgos_apds9960_irq(int pin, void *arg) {
 
   mgos_apds9960_get_light_int(sensor, &light_firing);
   mgos_apds9960_get_proximity_int(sensor, &proximity_firing);
-  // LOG(LL_INFO, ("Interrupt fired for APDS9960: light=%u proximity=%u", light_firing, proximity_firing));
+  mgos_apds9960_get_gesture_int(sensor, &gesture_firing);
+  LOG(LL_INFO, ("Interrupt fired for APDS9960: light=%u proximity=%u gesture=%u", light_firing, proximity_firing, gesture_firing));
 
   if (light_firing && sensor->light_handler) {
     uint16_t clear = 0, red = 0, green = 0, blue = 0;
@@ -364,6 +369,21 @@ void mgos_apds9960_irq(int pin, void *arg) {
     uint8_t proximity;
     mgos_apds9960_read_proximity(sensor, &proximity);
     sensor->proximity_handler(proximity);
+  }
+  if (gesture_firing && sensor->gesture_handler) {
+    uint8_t fifo[128];
+    uint8_t bytes_read = 0;
+    while (mgos_apds9960_is_gesture_available(sensor)) {
+      if (!mgos_apds9960_get_gesture_fifo(sensor, fifo, &bytes_read)) {
+        LOG(LL_ERROR, ("Could not read Gesture FIFO"));
+      } else {
+        LOG(LL_INFO, ("Read %u bytes from FIFO", bytes_read));
+        for (int i=0; i<bytes_read / 4; i++) {
+          LOG(LL_INFO, ("U=%u D=%u L=%u R=%u", fifo[i*4+0], fifo[i*4+1], fifo[i*4+2], fifo[i*4+3]));
+        }
+        sensor->gesture_handler(APDS9960_DIR_NONE);
+      }
+    }
   }
 
   mgos_apds9960_clear_proximity_int(sensor);
