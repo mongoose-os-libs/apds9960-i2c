@@ -1611,8 +1611,6 @@ static bool mgos_apds9960_read_blue_light(struct mgos_apds9960 *sensor, uint16_t
 }
 
 bool mgos_apds9960_read_light(struct mgos_apds9960 *sensor, uint16_t *c, uint16_t *r, uint16_t *g, uint16_t *b) {
-  uint8_t crgb[8];
-
   if (!sensor) {
     return false;
   }
