@@ -205,19 +205,25 @@ typedef struct apds9960_gesture_data_type {
 } apds9960_gesture_data_type;
 
 struct mgos_apds9960 {
-  struct mgos_i2c *          i2c;
-  uint8_t                    i2caddr;
+  struct mgos_i2c *               i2c;
+  uint8_t                         i2caddr;
+
+  /* Handlers */
+  mgos_apds9960_light_event_t     light_handler;
+  mgos_apds9960_proximity_event_t proximity_handler;
+  mgos_apds9960_gesture_event_t   gesture_handler;
+
 
   /* Private data for the driver */
-  apds9960_gesture_data_type gesture_data_;
-  int                        gesture_ud_delta_;
-  int                        gesture_lr_delta_;
-  int                        gesture_ud_count_;
-  int                        gesture_lr_count_;
-  int                        gesture_near_count_;
-  int                        gesture_far_count_;
-  enum mgos_apds9960_state_t gesture_state_;
-  int                        gesture_motion_;
+  apds9960_gesture_data_type      gesture_data_;
+  int                             gesture_ud_delta_;
+  int                             gesture_lr_delta_;
+  int                             gesture_ud_count_;
+  int                             gesture_lr_count_;
+  int                             gesture_near_count_;
+  int                             gesture_far_count_;
+  enum mgos_apds9960_state_t      gesture_state_;
+  int                             gesture_motion_;
 };
 
 /* Mongoose OS intiializer */

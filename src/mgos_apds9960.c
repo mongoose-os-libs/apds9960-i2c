@@ -40,6 +40,9 @@ struct mgos_apds9960 *mgos_apds9960_create(struct mgos_i2c *i2c, uint8_t i2caddr
   sensor->gesture_far_count_  = 0;
   sensor->gesture_state_      = 0;
   sensor->gesture_motion_     = APDS9960_DIR_NONE;
+  sensor->light_handler       = NULL;
+  sensor->proximity_handler   = NULL;
+  sensor->gesture_handler     = NULL;
   mgos_apds9960_resetGestureParameters(sensor);
 
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ID, &id)) {
@@ -260,4 +263,64 @@ int mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor) {
     }
   }
   return -1;
+}
+
+bool mgos_apds9960_set_callback_light(struct mgos_apds9960 *sensor, uint16_t low_threshold, uint16_t high_threshold, mgos_apds9960_light_event_t handler) {
+  if (!sensor) {
+    return false;
+  }
+
+  if (!mgos_apds9960_set_light_int_low_threshold(sensor, low_threshold)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_light_int_high_threshold(sensor, high_threshold)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_light_int_enable(sensor, true)) {
+    return false;
+  }
+
+  sensor->light_handler = handler;
+  return true;
+}
+
+bool mgos_apds9960_set_callback_proximity(struct mgos_apds9960 *sensor, uint16_t low_threshold, uint16_t high_threshold, mgos_apds9960_proximity_event_t handler) {
+  if (!sensor) {
+    return false;
+  }
+
+  if (!mgos_apds9960_set_proximity_int_low_threshold(sensor, low_threshold)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_proximity_int_high_threshold(sensor, high_threshold)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_proximity_int_enable(sensor, true)) {
+    return false;
+  }
+
+  sensor->proximity_handler = handler;
+  return true;
+}
+
+bool mgos_apds9960_set_callback_gesture(struct mgos_apds9960 *sensor, uint16_t enter_threshold, uint16_t exit_threshold, uint8_t wait_time, mgos_apds9960_gesture_event_t handler) {
+  if (!sensor) {
+    return false;
+  }
+
+  if (!mgos_apds9960_set_gesture_enter_threshold(sensor, enter_threshold)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_gesture_exit_threshold(sensor, exit_threshold)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_gesture_wait_time(sensor, wait_time)) {
+    return false;
+  }
+  if (!mgos_apds9960_set_gesture_int_enable(sensor, true)) {
+    return false;
+  }
+
+  sensor->gesture_handler = handler;
+  return true;
 }

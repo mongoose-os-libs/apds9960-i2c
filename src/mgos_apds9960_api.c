@@ -564,7 +564,7 @@ bool mgos_apds9960_init(struct mgos_apds9960 *sensor) {
   if (!mgos_apds9960_set_proximity_gain(sensor, APDS9960_DEFAULT_PGAIN)) {
     return false;
   }
-  if (!mgos_apds9960_set_ambient_light_gain(sensor, APDS9960_DEFAULT_AGAIN)) {
+  if (!mgos_apds9960_set_light_gain(sensor, APDS9960_DEFAULT_AGAIN)) {
     return false;
   }
   if (!mgos_apds9960_set_proximity_int_low_threshold(sensor, APDS9960_DEFAULT_PILT)) {
@@ -704,7 +704,7 @@ bool mgos_apds9960_enable_light_sensor(struct mgos_apds9960 *sensor) {
     return false;
   }
 
-  if (!mgos_apds9960_set_ambient_light_gain(sensor, APDS9960_DEFAULT_AGAIN)) {
+  if (!mgos_apds9960_set_light_gain(sensor, APDS9960_DEFAULT_AGAIN)) {
     return false;
   }
   if (!mgos_apds9960_enable(sensor)) {
@@ -721,7 +721,7 @@ bool mgos_apds9960_disable_light_sensor(struct mgos_apds9960 *sensor) {
   if (!sensor) {
     return false;
   }
-  if (!mgos_apds9960_set_ambient_light_int_enable(sensor, 0)) {
+  if (!mgos_apds9960_set_light_int_enable(sensor, false)) {
     return false;
   }
   if (!mgos_apds9960_set_mode(sensor, APDS9960_AMBIENT_LIGHT, 0)) {
@@ -896,7 +896,7 @@ bool mgos_apds9960_set_gesture_led_drive(struct mgos_apds9960 *sensor, bool enab
   return true;
 }
 
-bool mgos_apds9960_get_ambient_light_gain(struct mgos_apds9960 *sensor, uint8_t *gain) {
+bool mgos_apds9960_get_light_gain(struct mgos_apds9960 *sensor, uint8_t *gain) {
   if (!sensor) {
     return false;
   }
@@ -909,7 +909,7 @@ bool mgos_apds9960_get_ambient_light_gain(struct mgos_apds9960 *sensor, uint8_t 
   return true;
 }
 
-bool mgos_apds9960_set_ambient_light_gain(struct mgos_apds9960 *sensor, uint8_t gain) {
+bool mgos_apds9960_set_light_gain(struct mgos_apds9960 *sensor, uint8_t gain) {
   uint8_t val;
 
   if (!sensor) {
@@ -1139,7 +1139,7 @@ bool mgos_apds9960_set_proximity_int_high_threshold(struct mgos_apds9960 *sensor
   return true;
 }
 
-bool mgos_apds9960_get_ambient_light_int_enable(struct mgos_apds9960 *sensor, bool *enabled) {
+bool mgos_apds9960_get_light_int_enable(struct mgos_apds9960 *sensor, bool *enabled) {
   uint8_t val;
 
   if (!sensor || !enabled) {
@@ -1154,7 +1154,7 @@ bool mgos_apds9960_get_ambient_light_int_enable(struct mgos_apds9960 *sensor, bo
   return true;
 }
 
-bool mgos_apds9960_set_ambient_light_int_enable(struct mgos_apds9960 *sensor, bool enable) {
+bool mgos_apds9960_set_light_int_enable(struct mgos_apds9960 *sensor, bool enable) {
   uint8_t val;
   uint8_t enable_val;
 
