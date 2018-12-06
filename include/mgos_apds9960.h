@@ -17,6 +17,7 @@
 #pragma once
 #include "mgos.h"
 #include "mgos_i2c.h"
+#include "mgos_gpio.h"
 #include "mgos_apds9960_api.h"
 
 struct mgos_apds9960;

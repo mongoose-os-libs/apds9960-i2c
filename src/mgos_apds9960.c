@@ -62,6 +62,14 @@ struct mgos_apds9960 *mgos_apds9960_create(struct mgos_i2c *i2c, uint8_t i2caddr
     return false;
   }
 
+  // Install interrupt handler
+  if (mgos_sys_config_get_apds9960_irq_pin() > 0) {
+    mgos_gpio_set_mode(mgos_sys_config_get_apds9960_irq_pin(), MGOS_GPIO_MODE_INPUT);
+    mgos_gpio_set_pull(mgos_sys_config_get_apds9960_irq_pin(), MGOS_GPIO_PULL_UP);
+    mgos_gpio_set_int_handler(mgos_sys_config_get_apds9960_irq_pin(), MGOS_GPIO_INT_EDGE_NEG, mgos_apds9960_irq, NULL);
+    mgos_gpio_enable_int(mgos_sys_config_get_apds9960_irq_pin());
+  }
+
   LOG(LL_INFO, ("APDS9960 initialized at I2C 0x%02x", sensor->i2caddr));
   return sensor;
 }
@@ -270,6 +278,9 @@ bool mgos_apds9960_set_callback_light(struct mgos_apds9960 *sensor, uint16_t low
     return false;
   }
 
+  if (!mgos_apds9960_enable_light_sensor(sensor)) {
+    return false;
+  }
   if (!mgos_apds9960_set_light_int_low_threshold(sensor, low_threshold)) {
     return false;
   }
@@ -289,6 +300,9 @@ bool mgos_apds9960_set_callback_proximity(struct mgos_apds9960 *sensor, uint16_t
     return false;
   }
 
+  if (!mgos_apds9960_enable_proximity_sensor(sensor)) {
+    return false;
+  }
   if (!mgos_apds9960_set_proximity_int_low_threshold(sensor, low_threshold)) {
     return false;
   }
@@ -308,6 +322,9 @@ bool mgos_apds9960_set_callback_gesture(struct mgos_apds9960 *sensor, uint16_t e
     return false;
   }
 
+  if (!mgos_apds9960_enable_gesture_sensor(sensor)) {
+    return false;
+  }
   if (!mgos_apds9960_set_gesture_enter_threshold(sensor, enter_threshold)) {
     return false;
   }
@@ -323,4 +340,10 @@ bool mgos_apds9960_set_callback_gesture(struct mgos_apds9960 *sensor, uint16_t e
 
   sensor->gesture_handler = handler;
   return true;
+}
+
+void mgos_apds9960_irq(int pin, void *arg) {
+  LOG(LL_INFO, ("Interrupt fired for APDS9960"));
+  (void)pin;
+  (void)arg;
 }
