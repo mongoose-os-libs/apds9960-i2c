@@ -13,7 +13,7 @@ includes:
 config_schema:
   - ["apds9960", "o", {title: "APDS9960 settings"}]
   - ["apds9960.i2caddr", "i", 0x39, {title: "I2C Address"}]
-  - ["apds9960.int_pin", "i", 2, {title: "Interrupt pin"}]
+  - ["apds9960.irq_pin", "i", 2, {title: "Interrupt pin"}]
 
 libs:
   - origin: https://github.com/mongoose-os-libs/i2c
