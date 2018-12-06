@@ -242,33 +242,36 @@ static void mgos_apds9960_resetGestureParameters(struct mgos_apds9960 *sensor);
 static bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor);
 static bool mgos_apds9960_decodeGesture(struct mgos_apds9960 *sensor);
 
-static uint8_t mgos_apds9960_getProxIntLowThresh(struct mgos_apds9960 *sensor);
+//static uint8_t mgos_apds9960_getProxIntLowThresh(struct mgos_apds9960 *sensor);
 static bool mgos_apds9960_setProxIntLowThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
-static uint8_t mgos_apds9960_getProxIntHighThresh(struct mgos_apds9960 *sensor);
+
+//static uint8_t mgos_apds9960_getProxIntHighThresh(struct mgos_apds9960 *sensor);
 static bool mgos_apds9960_setProxIntHighThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
 
-static uint8_t mgos_apds9960_getLEDBoost(struct mgos_apds9960 *sensor);
+//static uint8_t mgos_apds9960_getLEDBoost(struct mgos_apds9960 *sensor);
 static bool mgos_apds9960_setLEDBoost(struct mgos_apds9960 *sensor, uint8_t boost);
 
-static uint8_t mgos_apds9960_getProxGainCompEnable(struct mgos_apds9960 *sensor);
-static bool mgos_apds9960_setProxGainCompEnable(struct mgos_apds9960 *sensor, uint8_t enable);
-static uint8_t mgos_apds9960_getProxPhotoMask(struct mgos_apds9960 *sensor);
-static bool mgos_apds9960_setProxPhotoMask(struct mgos_apds9960 *sensor, uint8_t mask);
+//static uint8_t mgos_apds9960_getProxGainCompEnable(struct mgos_apds9960 *sensor);
+//static bool mgos_apds9960_setProxGainCompEnable(struct mgos_apds9960 *sensor, uint8_t enable);
+//static uint8_t mgos_apds9960_getProxPhotoMask(struct mgos_apds9960 *sensor);
+//static bool mgos_apds9960_setProxPhotoMask(struct mgos_apds9960 *sensor, uint8_t mask);
 
-static uint8_t mgos_apds9960_getGestureEnterThresh(struct mgos_apds9960 *sensor);
+//static uint8_t mgos_apds9960_getGestureEnterThresh(struct mgos_apds9960 *sensor);
 static bool mgos_apds9960_setGestureEnterThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
-static uint8_t mgos_apds9960_getGestureExitThresh(struct mgos_apds9960 *sensor);
+
+//static uint8_t mgos_apds9960_getGestureExitThresh(struct mgos_apds9960 *sensor);
 static bool mgos_apds9960_setGestureExitThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
 
-static uint8_t mgos_apds9960_getGestureWaitTime(struct mgos_apds9960 *sensor);
+//static uint8_t mgos_apds9960_getGestureWaitTime(struct mgos_apds9960 *sensor);
 static bool mgos_apds9960_setGestureWaitTime(struct mgos_apds9960 *sensor, uint8_t time);
 
-static uint8_t mgos_apds9960_getGestureMode(struct mgos_apds9960 *sensor);
+//static uint8_t mgos_apds9960_getGestureMode(struct mgos_apds9960 *sensor);
 static bool mgos_apds9960_setGestureMode(struct mgos_apds9960 *sensor, uint8_t mode);
 
-static bool mgos_apds9960_wireWriteByte(struct mgos_apds9960 *sensor, uint8_t val);
+//static bool mgos_apds9960_wireWriteByte(struct mgos_apds9960 *sensor, uint8_t val);
 static bool mgos_apds9960_wireWriteDataByte(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t val);
-static bool mgos_apds9960_wireWriteDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len);
+
+//static bool mgos_apds9960_wireWriteDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len);
 static bool mgos_apds9960_wireReadDataByte(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val);
 static int mgos_apds9960_wireReadDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len);
 

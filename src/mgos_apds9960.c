@@ -42,7 +42,6 @@ struct mgos_apds9960 *mgos_apds9960_create(struct mgos_i2c *i2c, uint8_t i2caddr
   sensor->gesture_motion_     = APDS9960_DIR_NONE;
   mgos_apds9960_resetGestureParameters(sensor);
 
-  /* Read ID register and check against known values for APDS-9960 */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ID, &id)) {
     LOG(LL_ERROR, ("Cannot read from device at I2C 0x%02x", sensor->i2caddr));
     free(sensor);
@@ -123,15 +122,15 @@ static bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor) {
     return false;
   }
 
-  /* If we have less than 4 total gestures, that's not enough */
+  // If we have less than 4 total gestures, that's not enough
   if (sensor->gesture_data_.total_gestures <= 4) {
     return false;
   }
 
-  /* Check to make sure our data isn't out of bounds */
+  // Check to make sure our data isn't out of bounds
   if ((sensor->gesture_data_.total_gestures <= 32) && \
       (sensor->gesture_data_.total_gestures > 0)) {
-    /* Find the first value in U/D/L/R above the threshold */
+    // Find the first value in U/D/L/R above the threshold
     for (i = 0; i < sensor->gesture_data_.total_gestures; i++) {
       if ((sensor->gesture_data_.u_data[i] > APDS9960_GESTURE_THRESHOLD_OUT) &&
           (sensor->gesture_data_.d_data[i] > APDS9960_GESTURE_THRESHOLD_OUT) &&
@@ -145,12 +144,12 @@ static bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor) {
       }
     }
 
-    /* If one of the _first values is 0, then there is no good data */
+    // If one of the _first values is 0, then there is no good data
     if ((u_first == 0) || (d_first == 0) || \
         (l_first == 0) || (r_first == 0)) {
       return false;
     }
-    /* Find the last value in U/D/L/R above the threshold */
+    // Find the last value in U/D/L/R above the threshold
     for (i = sensor->gesture_data_.total_gestures - 1; i >= 0; i--) {
 #if DEBUG
       LOG(LL_DEBUG, ("Finding last: U=%d D=%d L=%d R=%d", sensor->gesture_data_.u_data[i], sensor->gesture_data_.d_data[i], sensor->gesture_data_.l_data[i], sensor->gesture_data_.r_data[i]));
@@ -180,7 +179,7 @@ static bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor) {
     }
   }
 
-  /* Calculate the first vs. last ratio of up/down and left/right */
+  // Calculate the first vs. last ratio of up/down and left/right
   ud_ratio_first = ((u_first - d_first) * 100) / (u_first + d_first);
   lr_ratio_first = ((l_first - r_first) * 100) / (l_first + r_first);
   ud_ratio_last  = ((u_last - d_last) * 100) / (u_last + d_last);
@@ -213,7 +212,7 @@ static bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor) {
    */
 #endif
 
-  /* Determine the difference between the first and last ratios */
+  // Determine the difference between the first and last ratios
   ud_delta = ud_ratio_last - ud_ratio_first;
   lr_delta = lr_ratio_last - lr_ratio_first;
 
@@ -229,7 +228,7 @@ static bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor) {
    */
 #endif
 
-  /* Accumulate the UD and LR delta values */
+  // Accumulate the UD and LR delta values
   sensor->gesture_ud_delta_ += ud_delta;
   sensor->gesture_lr_delta_ += lr_delta;
 
@@ -245,7 +244,7 @@ static bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor) {
    */
 #endif
 
-  /* Determine U/D gesture */
+  // Determine U/D gesture
   if (sensor->gesture_ud_delta_ >= APDS9960_GESTURE_SENSITIVITY_1) {
     sensor->gesture_ud_count_ = 1;
   } else if (sensor->gesture_ud_delta_ <= -APDS9960_GESTURE_SENSITIVITY_1) {
@@ -254,7 +253,7 @@ static bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor) {
     sensor->gesture_ud_count_ = 0;
   }
 
-  /* Determine L/R gesture */
+  // Determine L/R gesture
   if (sensor->gesture_lr_delta_ >= APDS9960_GESTURE_SENSITIVITY_1) {
     sensor->gesture_lr_count_ = 1;
   } else if (sensor->gesture_lr_delta_ <= -APDS9960_GESTURE_SENSITIVITY_1) {
@@ -263,7 +262,7 @@ static bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor) {
     sensor->gesture_lr_count_ = 0;
   }
 
-  /* Determine Near/Far gesture */
+  // Determine Near/Far gesture
   if ((sensor->gesture_ud_count_ == 0) && (sensor->gesture_lr_count_ == 0)) {
     if ((abs(ud_delta) < APDS9960_GESTURE_SENSITIVITY_2) && \
         (abs(lr_delta) < APDS9960_GESTURE_SENSITIVITY_2)) {
@@ -320,7 +319,8 @@ static bool mgos_apds9960_decodeGesture(struct mgos_apds9960 *sensor) {
   if (!sensor) {
     return false;
   }
-  /* Return if near or far event is detected */
+
+  // Return if near or far event is detected
   if (sensor->gesture_state_ == APDS9960_NEAR_STATE) {
     sensor->gesture_motion_ = APDS9960_DIR_NEAR;
     return true;
@@ -329,7 +329,7 @@ static bool mgos_apds9960_decodeGesture(struct mgos_apds9960 *sensor) {
     return true;
   }
 
-  /* Determine swipe direction */
+  // Determine swipe direction
   if ((sensor->gesture_ud_count_ == -1) && (sensor->gesture_lr_count_ == 0)) {
     sensor->gesture_motion_ = APDS9960_DIR_UP;
   } else if ((sensor->gesture_ud_count_ == 1) && (sensor->gesture_lr_count_ == 0)) {
@@ -369,17 +369,19 @@ static bool mgos_apds9960_decodeGesture(struct mgos_apds9960 *sensor) {
   return true;
 }
 
-static uint8_t mgos_apds9960_getProxIntLowThresh(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
-  }
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PILT, &val)) {
-    return 0;
-  }
-  return val;
-}
+/*
+ * static uint8_t mgos_apds9960_getProxIntLowThresh(struct mgos_apds9960 *sensor) {
+ * uint8_t val;
+ *
+ * if (!sensor) {
+ *  return 0;
+ * }
+ * if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PILT, &val)) {
+ *  return 0;
+ * }
+ * return val;
+ * }
+ */
 
 static bool mgos_apds9960_setProxIntLowThresh(struct mgos_apds9960 *sensor, uint8_t threshold) {
   if (!sensor) {
@@ -392,17 +394,19 @@ static bool mgos_apds9960_setProxIntLowThresh(struct mgos_apds9960 *sensor, uint
   return true;
 }
 
-static uint8_t mgos_apds9960_getProxIntHighThresh(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
-  }
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PIHT, &val)) {
-    return 0;
-  }
-  return val;
-}
+/*
+ * static uint8_t mgos_apds9960_getProxIntHighThresh(struct mgos_apds9960 *sensor) {
+ * uint8_t val;
+ *
+ * if (!sensor) {
+ *  return 0;
+ * }
+ * if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PIHT, &val)) {
+ *  return 0;
+ * }
+ * return val;
+ * }
+ */
 
 static bool mgos_apds9960_setProxIntHighThresh(struct mgos_apds9960 *sensor, uint8_t threshold) {
   if (!sensor) {
@@ -415,23 +419,23 @@ static bool mgos_apds9960_setProxIntHighThresh(struct mgos_apds9960 *sensor, uin
   return true;
 }
 
-static uint8_t mgos_apds9960_getLEDBoost(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
-  }
-
-  /* Read value from CONFIG2 register */
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG2, &val)) {
-    return APDS9960_ERROR;
-  }
-
-  /* Shift and mask out LED_BOOST bits */
-  val = (val >> 4) & 0b00000011;
-
-  return val;
-}
+/*
+ * static uint8_t mgos_apds9960_getLEDBoost(struct mgos_apds9960 *sensor) {
+ * uint8_t val;
+ *
+ * if (!sensor) {
+ *  return 0;
+ * }
+ *
+ * if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG2, &val)) {
+ *  return APDS9960_ERROR;
+ * }
+ *
+ * val = (val >> 4) & 0b00000011;
+ *
+ * return val;
+ * }
+ */
 
 static bool mgos_apds9960_setLEDBoost(struct mgos_apds9960 *sensor, uint8_t boost) {
   uint8_t val;
@@ -440,18 +444,15 @@ static bool mgos_apds9960_setLEDBoost(struct mgos_apds9960 *sensor, uint8_t boos
     return false;
   }
 
-  /* Read value from CONFIG2 register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG2, &val)) {
     return false;
   }
 
-  /* Set bits in register to given value */
   boost &= 0b00000011;
   boost  = boost << 4;
   val   &= 0b11001111;
   val   |= boost;
 
-  /* Write register value back into CONFIG2 register */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONFIG2, val)) {
     return false;
   }
@@ -459,107 +460,106 @@ static bool mgos_apds9960_setLEDBoost(struct mgos_apds9960 *sensor, uint8_t boos
   return true;
 }
 
-static uint8_t mgos_apds9960_getProxGainCompEnable(struct mgos_apds9960 *sensor) {
-  uint8_t val;
+/*
+ * static uint8_t mgos_apds9960_getProxGainCompEnable(struct mgos_apds9960 *sensor) {
+ * uint8_t val;
+ *
+ * if (!sensor) {
+ *  return 0;
+ * }
+ *
+ * if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG3, &val)) {
+ *  return APDS9960_ERROR;
+ * }
+ *
+ * val = (val >> 5) & 0b00000001;
+ *
+ * return val;
+ * }
+ */
 
-  if (!sensor) {
-    return 0;
-  }
+/*
+ * static bool mgos_apds9960_setProxGainCompEnable(struct mgos_apds9960 *sensor, uint8_t enable) {
+ * uint8_t val;
+ *
+ * if (!sensor) {
+ *  return false;
+ * }
+ *
+ * if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG3, &val)) {
+ *  return false;
+ * }
+ *
+ * enable &= 0b00000001;
+ * enable  = enable << 5;
+ * val    &= 0b11011111;
+ * val    |= enable;
+ *
+ * if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONFIG3, val)) {
+ *  return false;
+ * }
+ *
+ * return true;
+ * }
+ */
 
-  /* Read value from CONFIG3 register */
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG3, &val)) {
-    return APDS9960_ERROR;
-  }
+/*
+ * static uint8_t mgos_apds9960_getProxPhotoMask(struct mgos_apds9960 *sensor) {
+ * uint8_t val;
+ *
+ * if (!sensor) {
+ *  return 0;
+ * }
+ *
+ * if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG3, &val)) {
+ *  return APDS9960_ERROR;
+ * }
+ *
+ * val &= 0b00001111;
+ *
+ * return val;
+ * }
+ */
 
-  /* Shift and mask out PCMP bits */
-  val = (val >> 5) & 0b00000001;
+/*
+ * static bool mgos_apds9960_setProxPhotoMask(struct mgos_apds9960 *sensor, uint8_t mask) {
+ * uint8_t val;
+ *
+ * if (!sensor) {
+ *  return false;
+ * }
+ *
+ * if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG3, &val)) {
+ *  return false;
+ * }
+ *
+ * mask &= 0b00001111;
+ * val  &= 0b11110000;
+ * val  |= mask;
+ *
+ * if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONFIG3, val)) {
+ *  return false;
+ * }
+ *
+ * return true;
+ * }
+ */
 
-  return val;
-}
-
-static bool mgos_apds9960_setProxGainCompEnable(struct mgos_apds9960 *sensor, uint8_t enable) {
-  uint8_t val;
-
-  if (!sensor) {
-    return false;
-  }
-
-  /* Read value from CONFIG3 register */
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG3, &val)) {
-    return false;
-  }
-
-  /* Set bits in register to given value */
-  enable &= 0b00000001;
-  enable  = enable << 5;
-  val    &= 0b11011111;
-  val    |= enable;
-
-  /* Write register value back into CONFIG3 register */
-  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONFIG3, val)) {
-    return false;
-  }
-
-  return true;
-}
-
-static uint8_t mgos_apds9960_getProxPhotoMask(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
-  }
-
-  /* Read value from CONFIG3 register */
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG3, &val)) {
-    return APDS9960_ERROR;
-  }
-
-  /* Mask out photodiode enable mask bits */
-  val &= 0b00001111;
-
-  return val;
-}
-
-static bool mgos_apds9960_setProxPhotoMask(struct mgos_apds9960 *sensor, uint8_t mask) {
-  uint8_t val;
-
-  if (!sensor) {
-    return false;
-  }
-
-  /* Read value from CONFIG3 register */
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONFIG3, &val)) {
-    return false;
-  }
-
-  /* Set bits in register to given value */
-  mask &= 0b00001111;
-  val  &= 0b11110000;
-  val  |= mask;
-
-  /* Write register value back into CONFIG3 register */
-  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONFIG3, val)) {
-    return false;
-  }
-
-  return true;
-}
-
-static uint8_t mgos_apds9960_getGestureEnterThresh(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
-  }
-
-  /* Read value from GPENTH register */
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GPENTH, &val)) {
-    val = 0;
-  }
-
-  return val;
-}
+/*
+ * static uint8_t mgos_apds9960_getGestureEnterThresh(struct mgos_apds9960 *sensor) {
+ * uint8_t val;
+ *
+ * if (!sensor) {
+ *  return 0;
+ * }
+ *
+ * if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GPENTH, &val)) {
+ *  val = 0;
+ * }
+ *
+ * return val;
+ * }
+ */
 
 static bool mgos_apds9960_setGestureEnterThresh(struct mgos_apds9960 *sensor, uint8_t threshold) {
   if (!sensor) {
@@ -572,20 +572,21 @@ static bool mgos_apds9960_setGestureEnterThresh(struct mgos_apds9960 *sensor, ui
   return true;
 }
 
-static uint8_t mgos_apds9960_getGestureExitThresh(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
-  }
-
-  /* Read value from GEXTH register */
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GEXTH, &val)) {
-    val = 0;
-  }
-
-  return val;
-}
+/*
+ * static uint8_t mgos_apds9960_getGestureExitThresh(struct mgos_apds9960 *sensor) {
+ * uint8_t val;
+ *
+ * if (!sensor) {
+ *  return 0;
+ * }
+ *
+ * if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GEXTH, &val)) {
+ *  val = 0;
+ * }
+ *
+ * return val;
+ * }
+ */
 
 static bool mgos_apds9960_setGestureExitThresh(struct mgos_apds9960 *sensor, uint8_t threshold) {
   if (!sensor) {
@@ -598,23 +599,23 @@ static bool mgos_apds9960_setGestureExitThresh(struct mgos_apds9960 *sensor, uin
   return true;
 }
 
-static uint8_t mgos_apds9960_getGestureWaitTime(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
-  }
-
-  /* Read value from GCONF2 register */
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, &val)) {
-    return APDS9960_ERROR;
-  }
-
-  /* Mask out GWTIME bits */
-  val &= 0b00000111;
-
-  return val;
-}
+/*
+ * static uint8_t mgos_apds9960_getGestureWaitTime(struct mgos_apds9960 *sensor) {
+ * uint8_t val;
+ *
+ * if (!sensor) {
+ *  return 0;
+ * }
+ *
+ * if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, &val)) {
+ *  return APDS9960_ERROR;
+ * }
+ *
+ * val &= 0b00000111;
+ *
+ * return val;
+ * }
+ */
 
 static bool mgos_apds9960_setGestureWaitTime(struct mgos_apds9960 *sensor, uint8_t time) {
   uint8_t val;
@@ -623,17 +624,14 @@ static bool mgos_apds9960_setGestureWaitTime(struct mgos_apds9960 *sensor, uint8
     return false;
   }
 
-  /* Read value from GCONF2 register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, &val)) {
     return false;
   }
 
-  /* Set bits in register to given value */
   time &= 0b00000111;
   val  &= 0b11111000;
   val  |= time;
 
-  /* Write register value back into GCONF2 register */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GCONF2, val)) {
     return false;
   }
@@ -641,23 +639,23 @@ static bool mgos_apds9960_setGestureWaitTime(struct mgos_apds9960 *sensor, uint8
   return true;
 }
 
-static uint8_t mgos_apds9960_getGestureMode(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
-  }
-
-  /* Read value from GCONF4 register */
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF4, &val)) {
-    return APDS9960_ERROR;
-  }
-
-  /* Mask out GMODE bit */
-  val &= 0b00000001;
-
-  return val;
-}
+/*
+ * static uint8_t mgos_apds9960_getGestureMode(struct mgos_apds9960 *sensor) {
+ * uint8_t val;
+ *
+ * if (!sensor) {
+ *  return 0;
+ * }
+ *
+ * if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF4, &val)) {
+ *  return APDS9960_ERROR;
+ * }
+ *
+ * val &= 0b00000001;
+ *
+ * return val;
+ * }
+ */
 
 static bool mgos_apds9960_setGestureMode(struct mgos_apds9960 *sensor, uint8_t mode) {
   uint8_t val;
@@ -666,17 +664,14 @@ static bool mgos_apds9960_setGestureMode(struct mgos_apds9960 *sensor, uint8_t m
     return false;
   }
 
-  /* Read value from GCONF4 register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF4, &val)) {
     return false;
   }
 
-  /* Set bits in register to given value */
   mode &= 0b00000001;
   val  &= 0b11111110;
   val  |= mode;
 
-  /* Write register value back into GCONF4 register */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GCONF4, val)) {
     return false;
   }
@@ -684,13 +679,15 @@ static bool mgos_apds9960_setGestureMode(struct mgos_apds9960 *sensor, uint8_t m
   return true;
 }
 
-static bool mgos_apds9960_wireWriteByte(struct mgos_apds9960 *sensor, uint8_t val) {
-  if (!sensor) {
-    return false;
-  }
-
-  return mgos_i2c_write(sensor->i2c, sensor->i2caddr, &val, 1, true);
-}
+/*
+ * static bool mgos_apds9960_wireWriteByte(struct mgos_apds9960 *sensor, uint8_t val) {
+ * if (!sensor) {
+ *  return false;
+ * }
+ *
+ * return mgos_i2c_write(sensor->i2c, sensor->i2caddr, &val, 1, true);
+ * }
+ */
 
 static bool mgos_apds9960_wireWriteDataByte(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t val) {
   if (!sensor) {
@@ -700,18 +697,20 @@ static bool mgos_apds9960_wireWriteDataByte(struct mgos_apds9960 *sensor, uint8_
   return mgos_i2c_write_reg_b(sensor->i2c, sensor->i2caddr, reg, val);
 }
 
-static bool mgos_apds9960_wireWriteDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len) {
-  if (!sensor || !val) {
-    return false;
-  }
-
-  if (!mgos_i2c_write(sensor->i2c, sensor->i2caddr, &reg, 1, false)) {
-    mgos_i2c_stop(sensor->i2c);
-    return false;
-  }
-
-  return mgos_i2c_write(sensor->i2c, MGOS_I2C_ADDR_CONTINUE, val, len, true);
-}
+/*
+ * static bool mgos_apds9960_wireWriteDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len) {
+ * if (!sensor || !val) {
+ *  return false;
+ * }
+ *
+ * if (!mgos_i2c_write(sensor->i2c, sensor->i2caddr, &reg, 1, false)) {
+ *  mgos_i2c_stop(sensor->i2c);
+ *  return false;
+ * }
+ *
+ * return mgos_i2c_write(sensor->i2c, MGOS_I2C_ADDR_CONTINUE, val, len, true);
+ * }
+ */
 
 static bool mgos_apds9960_wireReadDataByte(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val) {
   int ret;
@@ -753,12 +752,12 @@ bool mgos_apds9960_init(struct mgos_apds9960 *sensor) {
     return false;
   }
 
-  /* Reset device first: power down and disable all features */
+  // Reset device first: power down and disable all features
   if (!mgos_apds9960_disable(sensor)) {
     return false;
   }
 
-  /* Set default values for ambient light and proximity registers */
+  // Set default values for ambient light and proximity registers
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_ATIME, APDS9960_DEFAULT_ATIME)) {
     return false;
   }
@@ -808,7 +807,7 @@ bool mgos_apds9960_init(struct mgos_apds9960 *sensor) {
     return false;
   }
 
-  /* Set default values for gesture sense registers */
+  // Set default values for gesture sense registers
   if (!mgos_apds9960_setGestureEnterThresh(sensor, APDS9960_DEFAULT_GPENTH)) {
     return false;
   }
@@ -849,7 +848,7 @@ bool mgos_apds9960_init(struct mgos_apds9960 *sensor) {
     return false;
   }
 
-  /* Turn on the sensor power */
+  // Turn on the sensor power
   return mgos_apds9960_enable(sensor);
 }
 
@@ -865,7 +864,7 @@ bool mgos_apds9960_disable(struct mgos_apds9960 *sensor) {
     return false;
   }
 
-  /* Set ENABLE register to 0 (disable all features) */
+  // Set ENABLE register to 0 (disable all features)
   if (!mgos_apds9960_set_mode(sensor, APDS9960_ALL, APDS9960_OFF)) {
     return false;
   }
@@ -880,7 +879,6 @@ uint8_t mgos_apds9960_get_mode(struct mgos_apds9960 *sensor) {
     return 0;
   }
 
-  /* Read current ENABLE register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
     return APDS9960_ERROR;
   }
@@ -895,13 +893,11 @@ bool mgos_apds9960_set_mode(struct mgos_apds9960 *sensor, uint8_t mode, uint8_t 
     return false;
   }
 
-  /* Read current ENABLE register */
   val = mgos_apds9960_get_mode(sensor);
   if (val == APDS9960_ERROR) {
     return false;
   }
 
-  /* Change bit(s) in ENABLE register */
   enable = enable & 0x01;
   if (mode <= 6) {
     if (enable) {
@@ -917,7 +913,6 @@ bool mgos_apds9960_set_mode(struct mgos_apds9960 *sensor, uint8_t mode, uint8_t 
     }
   }
 
-  /* Write value back to ENABLE register */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_ENABLE, val)) {
     return false;
   }
@@ -929,7 +924,8 @@ bool mgos_apds9960_enable_light_sensor(struct mgos_apds9960 *sensor, bool interr
   if (!sensor) {
     return false;
   }
-  /* Set default gain, interrupts, enable power, and enable sensor */
+
+  // Set default gain, interrupts, enable power, and enable sensor
   if (!mgos_apds9960_set_ambient_light_gain(sensor, APDS9960_DEFAULT_AGAIN)) {
     return false;
   }
@@ -963,7 +959,8 @@ bool mgos_apds9960_enable_proximity_sensor(struct mgos_apds9960 *sensor, bool in
   if (!sensor) {
     return false;
   }
-  /* Set default gain, LED, interrupts, enable power, and enable sensor */
+
+  // Set default gain, LED, interrupts, enable power, and enable sensor
   if (!mgos_apds9960_set_proximity_gain(sensor, APDS9960_DEFAULT_PGAIN)) {
     return false;
   }
@@ -1064,13 +1061,10 @@ uint8_t mgos_apds9960_get_led_drive(struct mgos_apds9960 *sensor) {
     return 0;
   }
 
-
-  /* Read value from CONTROL register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
     return APDS9960_ERROR;
   }
 
-  /* Shift and mask out LED drive bits */
   val = (val >> 6) & 0b00000011;
 
   return val;
@@ -1083,18 +1077,15 @@ bool mgos_apds9960_set_led_drive(struct mgos_apds9960 *sensor, uint8_t drive) {
     return false;
   }
 
-  /* Read value from CONTROL register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
     return false;
   }
 
-  /* Set bits in register to given value */
   drive &= 0b00000011;
   drive  = drive << 6;
   val   &= 0b00111111;
   val   |= drive;
 
-  /* Write register value back into CONTROL register */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONTROL, val)) {
     return false;
   }
@@ -1109,12 +1100,10 @@ uint8_t mgos_apds9960_get_gesture_led_drive(struct mgos_apds9960 *sensor) {
     return 0;
   }
 
-  /* Read value from GCONF2 register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, &val)) {
     return APDS9960_ERROR;
   }
 
-  /* Shift and mask out GLDRIVE bits */
   val = (val >> 3) & 0b00000011;
 
   return val;
@@ -1127,18 +1116,15 @@ bool mgos_apds9960_set_gesture_led_drive(struct mgos_apds9960 *sensor, uint8_t d
     return false;
   }
 
-  /* Read value from GCONF2 register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, &val)) {
     return false;
   }
 
-  /* Set bits in register to given value */
   drive &= 0b00000011;
   drive  = drive << 3;
   val   &= 0b11100111;
   val   |= drive;
 
-  /* Write register value back into GCONF2 register */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GCONF2, val)) {
     return false;
   }
@@ -1153,12 +1139,10 @@ uint8_t mgos_apds9960_get_ambient_light_gain(struct mgos_apds9960 *sensor) {
     return 0;
   }
 
-  /* Read value from CONTROL register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
     return APDS9960_ERROR;
   }
 
-  /* Shift and mask out AGAIN bits */
   val &= 0b00000011;
 
   return val;
@@ -1171,17 +1155,14 @@ bool mgos_apds9960_set_ambient_light_gain(struct mgos_apds9960 *sensor, uint8_t 
     return false;
   }
 
-  /* Read value from CONTROL register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
     return false;
   }
 
-  /* Set bits in register to given value */
   gain &= 0b00000011;
   val  &= 0b11111100;
   val  |= gain;
 
-  /* Write register value back into CONTROL register */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONTROL, val)) {
     return false;
   }
@@ -1196,12 +1177,10 @@ uint8_t mgos_apds9960_get_proximity_gain(struct mgos_apds9960 *sensor) {
     return 0;
   }
 
-  /* Read value from CONTROL register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
     return APDS9960_ERROR;
   }
 
-  /* Shift and mask out PGAIN bits */
   val = (val >> 2) & 0b00000011;
 
 
@@ -1215,18 +1194,15 @@ bool mgos_apds9960_set_proximity_gain(struct mgos_apds9960 *sensor, uint8_t gain
     return false;
   }
 
-  /* Read value from CONTROL register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
     return false;
   }
 
-  /* Set bits in register to given value */
   gain &= 0b00000011;
   gain  = gain << 2;
   val  &= 0b11110011;
   val  |= gain;
 
-  /* Write register value back into CONTROL register */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_CONTROL, val)) {
     return false;
   }
@@ -1241,12 +1217,10 @@ uint8_t mgos_apds9960_get_gesture_gain(struct mgos_apds9960 *sensor) {
     return 0;
   }
 
-  /* Read value from CONTROL register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, &val)) {
     return APDS9960_ERROR;
   }
 
-  /* Shift and mask out GGAIN bits */
   val = (val >> 5) & 0b00000011;
 
   return val;
@@ -1259,18 +1233,15 @@ bool mgos_apds9960_set_gesture_gain(struct mgos_apds9960 *sensor, uint8_t gain) 
     return false;
   }
 
-  /* Read value from CONTROL register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF2, &val)) {
     return false;
   }
 
-  /* Set bits in register to given value */
   gain &= 0b00000011;
   gain  = gain << 5;
   val  &= 0b10011111;
   val  |= gain;
 
-  /* Write register value back into CONTROL register */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GCONF2, val)) {
     return false;
   }
@@ -1285,13 +1256,11 @@ bool mgos_apds9960_get_light_int_low_threshold(struct mgos_apds9960 *sensor, uin
   }
   *threshold = 0;
 
-  /* Read value from ambient light low threshold, low byte register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_AILTL, &val)) {
     return false;
   }
   *threshold = val;
 
-  /* Read value from ambient light low threshold, high byte register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_AILTH, &val)) {
     return false;
   }
@@ -1308,16 +1277,14 @@ bool mgos_apds9960_set_light_int_low_threshold(struct mgos_apds9960 *sensor, uin
     return false;
   }
 
-  /* Break 16-bit threshold into 2 8-bit values */
+  // Break 16-bit threshold into 2 8-bit values
   val_low  = threshold & 0x00FF;
   val_high = (threshold & 0xFF00) >> 8;
 
-  /* Write low byte */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_AILTL, val_low)) {
     return false;
   }
 
-  /* Write high byte */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_AILTH, val_high)) {
     return false;
   }
@@ -1334,13 +1301,11 @@ bool mgos_apds9960_get_light_int_high_threshold(struct mgos_apds9960 *sensor, ui
 
   *threshold = 0;
 
-  /* Read value from ambient light low threshold, low byte register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_AIHTL, &val)) {
     return false;
   }
   *threshold = val;
 
-  /* Read value from ambient light low threshold, high byte register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_AIHTH, &val)) {
     return false;
   }
@@ -1356,16 +1321,15 @@ bool mgos_apds9960_set_light_int_high_threshold(struct mgos_apds9960 *sensor, ui
   if (!sensor) {
     return false;
   }
-  /* Break 16-bit threshold into 2 8-bit values */
+
+  // Break 16-bit threshold into 2 8-bit values
   val_low  = threshold & 0x00FF;
   val_high = (threshold & 0xFF00) >> 8;
 
-  /* Write low byte */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_AIHTL, val_low)) {
     return false;
   }
 
-  /* Write high byte */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_AIHTH, val_high)) {
     return false;
   }
@@ -1377,7 +1341,7 @@ bool mgos_apds9960_get_proximity_int_low_threshold(struct mgos_apds9960 *sensor,
   if (!sensor || !threshold) {
     return false;
   }
-  /* Read value from proximity low threshold register */
+
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PILT, threshold)) {
     return false;
   }
@@ -1389,7 +1353,7 @@ bool mgos_apds9960_set_proximity_int_low_threshold(struct mgos_apds9960 *sensor,
   if (!sensor) {
     return false;
   }
-  /* Write threshold value to register */
+
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_PILT, threshold)) {
     return false;
   }
@@ -1401,7 +1365,7 @@ bool mgos_apds9960_get_proximity_int_high_threshold(struct mgos_apds9960 *sensor
   if (!sensor || !threshold) {
     return false;
   }
-  /* Read value from proximity high threshold register */
+
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PIHT, threshold)) {
     return false;
   }
@@ -1413,7 +1377,7 @@ bool mgos_apds9960_set_proximity_int_high_threshold(struct mgos_apds9960 *sensor
   if (!sensor) {
     return false;
   }
-  /* Write threshold value to register */
+
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_PIHT, threshold)) {
     return false;
   }
@@ -1428,12 +1392,10 @@ uint8_t mgos_apds9960_get_ambient_light_int_enable(struct mgos_apds9960 *sensor)
     return 0;
   }
 
-  /* Read value from ENABLE register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
     return APDS9960_ERROR;
   }
 
-  /* Shift and mask out AIEN bit */
   val = (val >> 4) & 0b00000001;
 
   return val;
@@ -1445,18 +1407,15 @@ bool mgos_apds9960_set_ambient_light_int_enable(struct mgos_apds9960 *sensor, ui
   if (!sensor) {
     return false;
   }
-  /* Read value from ENABLE register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
     return false;
   }
 
-  /* Set bits in register to given value */
   enable &= 0b00000001;
   enable  = enable << 4;
   val    &= 0b11101111;
   val    |= enable;
 
-  /* Write register value back into ENABLE register */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_ENABLE, val)) {
     return false;
   }
@@ -1471,12 +1430,10 @@ uint8_t mgos_apds9960_get_proximity_int_enable(struct mgos_apds9960 *sensor) {
     return 0;
   }
 
-  /* Read value from ENABLE register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
     return APDS9960_ERROR;
   }
 
-  /* Shift and mask out PIEN bit */
   val = (val >> 5) & 0b00000001;
 
   return val;
@@ -1488,18 +1445,15 @@ bool mgos_apds9960_set_proximity_int_enable(struct mgos_apds9960 *sensor, uint8_
   if (!sensor) {
     return false;
   }
-  /* Read value from ENABLE register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
     return false;
   }
 
-  /* Set bits in register to given value */
   enable &= 0b00000001;
   enable  = enable << 5;
   val    &= 0b11011111;
   val    |= enable;
 
-  /* Write register value back into ENABLE register */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_ENABLE, val)) {
     return false;
   }
@@ -1514,12 +1468,10 @@ uint8_t mgos_apds9960_get_gesture_int_enable(struct mgos_apds9960 *sensor) {
     return 0;
   }
 
-  /* Read value from ENABLE register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
     return APDS9960_ERROR;
   }
 
-  /* Shift and mask out GIEN bit */
   val = (val >> 1) & 0b00000001;
 
   return val;
@@ -1531,18 +1483,16 @@ bool mgos_apds9960_set_gesture_int_enable(struct mgos_apds9960 *sensor, uint8_t 
   if (!sensor) {
     return false;
   }
-  /* Read value from GCONF4 register */
+
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GCONF4, &val)) {
     return false;
   }
 
-  /* Set bits in register to given value */
   enable &= 0b00000001;
   enable  = enable << 1;
   val    &= 0b11111101;
   val    |= enable;
 
-  /* Write register value back into GCONF4 register */
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_GCONF4, val)) {
     return false;
   }
@@ -1584,13 +1534,11 @@ bool mgos_apds9960_read_ambient_light(struct mgos_apds9960 *sensor, uint16_t *va
   }
   *val = 0;
 
-  /* Read value from clear channel, low byte register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CDATAL, &val_byte)) {
     return false;
   }
   *val = val_byte;
 
-  /* Read value from clear channel, high byte register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CDATAH, &val_byte)) {
     return false;
   }
@@ -1607,13 +1555,11 @@ bool mgos_apds9960_read_red_light(struct mgos_apds9960 *sensor, uint16_t *val) {
   }
   *val = 0;
 
-  /* Read value from clear channel, low byte register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_RDATAL, &val_byte)) {
     return false;
   }
   *val = val_byte;
 
-  /* Read value from clear channel, high byte register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_RDATAH, &val_byte)) {
     return false;
   }
@@ -1630,13 +1576,11 @@ bool mgos_apds9960_read_green_light(struct mgos_apds9960 *sensor, uint16_t *val)
   }
   *val = 0;
 
-  /* Read value from clear channel, low byte register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GDATAL, &val_byte)) {
     return false;
   }
   *val = val_byte;
 
-  /* Read value from clear channel, high byte register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GDATAH, &val_byte)) {
     return false;
   }
@@ -1653,13 +1597,11 @@ bool mgos_apds9960_read_blue_light(struct mgos_apds9960 *sensor, uint16_t *val) 
   }
   *val = 0;
 
-  /* Read value from clear channel, low byte register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_BDATAL, &val_byte)) {
     return false;
   }
   *val = val_byte;
 
-  /* Read value from clear channel, high byte register */
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_BDATAH, &val_byte)) {
     return false;
   }
@@ -1684,15 +1626,13 @@ bool mgos_apds9960_is_gesture_available(struct mgos_apds9960 *sensor) {
   if (!sensor) {
     return false;
   }
-  /* Read value from GSTATUS register */
+
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GSTATUS, &val)) {
     return APDS9960_ERROR;
   }
 
-  /* Shift and mask out GVALID bit */
   val &= APDS9960_GVALID;
 
-  /* Return true/false based on GVALID bit */
   return val == 1;
 }
 
@@ -1707,23 +1647,23 @@ int mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor) {
   if (!sensor) {
     return -1;
   }
-  /* Make sure that power and gesture is on and data is valid */
+
   if (!mgos_apds9960_is_gesture_available(sensor) || !(mgos_apds9960_get_mode(sensor) & 0b01000001)) {
     return APDS9960_DIR_NONE;
   }
-  /* Keep looping as long as gesture data is valid */
+  // Keep looping as long as gesture data is valid
   while (1) {
-    /* Wait some time to collect next batch of FIFO data */
+    // Wait some time to collect next batch of FIFO data
     mgos_msleep(APDS9960_FIFO_PAUSE_TIME);
 
-    /* Get the contents of the STATUS register. Is data still valid? */
+    // Get the contents of the STATUS register. Is data still valid?
     if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GSTATUS, &gstatus)) {
       return APDS9960_ERROR;
     }
 
-    /* If we have valid data, read in FIFO */
+    // If we have valid data, read in FIFO
     if ((gstatus & APDS9960_GVALID) == APDS9960_GVALID) {
-      /* Read the current FIFO level */
+      // Read the current FIFO level
       if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GFLVL, &fifo_level)) {
         return APDS9960_ERROR;
       }
@@ -1737,7 +1677,7 @@ int mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor) {
        */
 #endif
 
-      /* If there's stuff in the FIFO, read it into our data block */
+      // If there's stuff in the FIFO, read it into our data block
       if (fifo_level > 0) {
         bytes_read = mgos_apds9960_wireReadDataBlock(sensor, APDS9960_GFIFO_U,
                                                      (uint8_t *)fifo_data,
@@ -1761,7 +1701,7 @@ int mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor) {
          */
 #endif
 
-        /* If at least 1 set of data, sort the data into U/D/L/R */
+        // If at least 1 set of data, sort the data into U/D/L/R
         if (bytes_read >= 4) {
           for (i = 0; i < bytes_read; i += 4) {
             sensor->gesture_data_.u_data[sensor->gesture_data_.index] = fifo_data[i + 0];
@@ -1788,23 +1728,23 @@ int mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor) {
            */
 #endif
 
-          /* Filter and process gesture data. Decode near/far state */
+          // Filter and process gesture data. Decode near/far state
           if (mgos_apds9960_processGestureData(sensor)) {
             if (mgos_apds9960_decodeGesture(sensor)) {
-              //***TODO: U-Turn Gestures
+              // ***TODO: U-Turn Gestures
 #if DEBUG
               //Serial.println(gesture_motion_);
 #endif
             }
           }
 
-          /* Reset data */
+          // Reset data
           sensor->gesture_data_.index          = 0;
           sensor->gesture_data_.total_gestures = 0;
         }
       }
     } else {
-      /* Determine best guessed gesture and clean up */
+      // Determine best guessed gesture and clean up
       mgos_msleep(APDS9960_FIFO_PAUSE_TIME);
       mgos_apds9960_decodeGesture(sensor);
       motion = sensor->gesture_motion_;
