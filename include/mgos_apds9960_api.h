@@ -35,7 +35,7 @@ bool mgos_apds9960_get_led_boost(struct mgos_apds9960 *sensor, uint8_t *boost);
 bool mgos_apds9960_set_led_boost(struct mgos_apds9960 *sensor, uint8_t boost);
 
 /* Light sensor API calls */
-bool mgos_apds9960_enable_light_sensor(struct mgos_apds9960 *sensor, bool interrupts);
+bool mgos_apds9960_enable_light_sensor(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_disable_light_sensor(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_get_ambient_light_gain(struct mgos_apds9960 *sensor, uint8_t *gain);
 bool mgos_apds9960_set_ambient_light_gain(struct mgos_apds9960 *sensor, uint8_t gain);
@@ -53,7 +53,7 @@ bool mgos_apds9960_read_blue_light(struct mgos_apds9960 *sensor, uint16_t *val);
 
 
 /* Proximity sensor API calls */
-bool mgos_apds9960_enable_proximity_sensor(struct mgos_apds9960 *sensor, bool interrupts);
+bool mgos_apds9960_enable_proximity_sensor(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_disable_proximity_sensor(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_get_proximity_gain(struct mgos_apds9960 *sensor, uint8_t *gain);
 bool mgos_apds9960_set_proximity_gain(struct mgos_apds9960 *sensor, uint8_t gain);
@@ -71,7 +71,7 @@ bool mgos_apds9960_set_proximity_photomask(struct mgos_apds9960 *sensor, uint8_t
 
 
 /* Gesture sensor API calls */
-bool mgos_apds9960_enable_gesture_sensor(struct mgos_apds9960 *sensor, bool interrupts);
+bool mgos_apds9960_enable_gesture_sensor(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_disable_gesture_sensor(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_get_gesture_led_drive(struct mgos_apds9960 *sensor, bool *enabled);
 bool mgos_apds9960_set_gesture_led_drive(struct mgos_apds9960 *sensor, bool enable);
