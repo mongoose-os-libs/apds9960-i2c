@@ -20,14 +20,6 @@
 #include "mgos_apds9960_api.h"
 
 struct mgos_apds9960;
-struct mgos_apds9960_stats {
-  double   last_read_time;       // value of mg_time() upon last call to _read()
-  uint32_t read;                 // calls to _read()
-  uint32_t read_success;         // successful _read()
-  uint32_t read_success_cached;  // calls to _read() which were cached
-  // Note: read_errors := read - read_success - read_success_cached
-  double   read_success_usecs;   // time spent in successful uncached _read()
-};
 
 /* Direction definitions */
 enum mgos_apds9960_direction_t {
@@ -86,13 +78,3 @@ bool mgos_apds9960_read_proximity(struct mgos_apds9960 *sensor, uint8_t *proximi
 
 bool mgos_apds9960_is_gesture_available(struct mgos_apds9960 *sensor);
 int mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor);
-
-/*
- * Returns the running statistics on the sensor interaction, the user provides
- * a pointer to a `struct mgos_apds9960_stats` object, which is filled in by this
- * call.
- *
- * Upon success, true is returned. Otherwise, false is returned, in which case
- * the contents of `stats` is undetermined.
- */
-bool mgos_apds9960_get_stats(struct mgos_apds9960 *sensor, struct mgos_apds9960_stats *stats);

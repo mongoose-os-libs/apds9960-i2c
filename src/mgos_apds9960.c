@@ -74,15 +74,6 @@ void mgos_apds9960_destroy(struct mgos_apds9960 **sensor) {
   return;
 }
 
-bool mgos_apds9960_get_stats(struct mgos_apds9960 *sensor, struct mgos_apds9960_stats *stats) {
-  if (!sensor || !stats) {
-    return false;
-  }
-
-  memcpy((void *)stats, (const void *)&sensor->stats, sizeof(struct mgos_apds9960_stats));
-  return true;
-}
-
 bool mgos_apds9960_read_light(struct mgos_apds9960 *sensor, uint16_t *c, uint16_t *r, uint16_t *g, uint16_t *b) {
   if (!sensor) {
     return false;

@@ -207,7 +207,6 @@ typedef struct apds9960_gesture_data_type {
 struct mgos_apds9960 {
   struct mgos_i2c *          i2c;
   uint8_t                    i2caddr;
-  struct mgos_apds9960_stats stats;
 
   /* Private data for the driver */
   apds9960_gesture_data_type gesture_data_;
