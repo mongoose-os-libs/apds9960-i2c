@@ -45,6 +45,7 @@ bool mgos_apds9960_get_light_int_high_threshold(struct mgos_apds9960 *sensor, ui
 bool mgos_apds9960_set_light_int_high_threshold(struct mgos_apds9960 *sensor, uint16_t threshold);
 bool mgos_apds9960_get_light_int_enable(struct mgos_apds9960 *sensor, bool *enabled);
 bool mgos_apds9960_set_light_int_enable(struct mgos_apds9960 *sensor, bool enable);
+bool mgos_apds9960_get_light_int(struct mgos_apds9960 *sensor, bool *firing);
 bool mgos_apds9960_clear_light_int(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_read_ambient_light(struct mgos_apds9960 *sensor, uint16_t *val);
 bool mgos_apds9960_read_red_light(struct mgos_apds9960 *sensor, uint16_t *val);
@@ -63,6 +64,7 @@ bool mgos_apds9960_get_proximity_int_high_threshold(struct mgos_apds9960 *sensor
 bool mgos_apds9960_set_proximity_int_high_threshold(struct mgos_apds9960 *sensor, uint8_t threshold);
 bool mgos_apds9960_get_proximity_int_enable(struct mgos_apds9960 *sensor, bool *enabled);
 bool mgos_apds9960_set_proximity_int_enable(struct mgos_apds9960 *sensor, bool enable);
+bool mgos_apds9960_get_proximity_int(struct mgos_apds9960 *sensor, bool *firing);
 bool mgos_apds9960_clear_proximity_int(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_get_proximity_gain_comp_enable(struct mgos_apds9960 *sensor, bool *enabled);
 bool mgos_apds9960_set_proximity_gain_comp_enable(struct mgos_apds9960 *sensor, bool enable);

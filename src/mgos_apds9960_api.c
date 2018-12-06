@@ -1251,7 +1251,22 @@ bool mgos_apds9960_set_gesture_int_enable(struct mgos_apds9960 *sensor, bool ena
   return true;
 }
 
-bool mgos_apds9960_clear_ambientlight_int(struct mgos_apds9960 *sensor) {
+bool mgos_apds9960_get_light_int(struct mgos_apds9960 *sensor, bool *firing) {
+  uint8_t val;
+
+  if (!sensor || !firing) {
+    return false;
+  }
+
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_STATUS, &val)) {
+    return false;
+  }
+
+  *firing = (val >> 4) & 0b00000001;
+  return true;
+}
+
+bool mgos_apds9960_clear_light_int(struct mgos_apds9960 *sensor) {
   uint8_t val;
 
   if (!sensor) {
@@ -1261,6 +1276,21 @@ bool mgos_apds9960_clear_ambientlight_int(struct mgos_apds9960 *sensor) {
     return false;
   }
 
+  return true;
+}
+
+bool mgos_apds9960_get_proximity_int(struct mgos_apds9960 *sensor, bool *firing) {
+  uint8_t val;
+
+  if (!sensor || !firing) {
+    return false;
+  }
+
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_STATUS, &val)) {
+    return false;
+  }
+
+  *firing = (val >> 5) & 0b00000001;
   return true;
 }
 
