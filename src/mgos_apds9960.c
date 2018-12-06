@@ -135,12 +135,19 @@ int mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor) {
   uint8_t gstatus;
   int     motion;
   int     i;
+  uint8_t mode;
 
   if (!sensor) {
     return -1;
   }
 
-  if (!mgos_apds9960_is_gesture_available(sensor) || !(mgos_apds9960_get_mode(sensor) & 0b01000001)) {
+  if (!mgos_apds9960_is_gesture_available(sensor)) {
+    return APDS9960_DIR_NONE;
+  }
+  if (!mgos_apds9960_get_mode(sensor, &mode)) {
+    return APDS9960_DIR_NONE;
+  }
+  if ((mode & 0b01000001) == 0) {
     return APDS9960_DIR_NONE;
   }
   // Keep looping as long as gesture data is valid

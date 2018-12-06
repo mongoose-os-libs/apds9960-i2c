@@ -654,18 +654,16 @@ bool mgos_apds9960_disable(struct mgos_apds9960 *sensor) {
   return mgos_apds9960_set_mode(sensor, APDS9960_POWER, APDS9960_OFF);
 }
 
-uint8_t mgos_apds9960_get_mode(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
+bool mgos_apds9960_get_mode(struct mgos_apds9960 *sensor, uint8_t *mode) {
+  if (!sensor || !mode) {
+    return false;
   }
 
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, &val)) {
-    return APDS9960_ERROR;
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ENABLE, mode)) {
+    return false;
   }
 
-  return val;
+  return true;
 }
 
 bool mgos_apds9960_set_mode(struct mgos_apds9960 *sensor, uint8_t mode, uint8_t enable) {
@@ -675,8 +673,7 @@ bool mgos_apds9960_set_mode(struct mgos_apds9960 *sensor, uint8_t mode, uint8_t 
     return false;
   }
 
-  val = mgos_apds9960_get_mode(sensor);
-  if (val == APDS9960_ERROR) {
+  if (!mgos_apds9960_get_mode(sensor, &val)) {
     return false;
   }
 
@@ -836,20 +833,17 @@ bool mgos_apds9960_disable_gesture_sensor(struct mgos_apds9960 *sensor) {
   return true;
 }
 
-uint8_t mgos_apds9960_get_led_drive(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
+bool mgos_apds9960_get_led_drive(struct mgos_apds9960 *sensor, uint8_t *drive) {
+  if (!sensor || !drive) {
+    return false;
   }
 
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, &val)) {
-    return APDS9960_ERROR;
+  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_CONTROL, drive)) {
+    return false;
   }
 
-  val = (val >> 6) & 0b00000011;
-
-  return val;
+  *drive = (*drive >> 6) & 0b00000011;
+  return true;
 }
 
 bool mgos_apds9960_set_led_drive(struct mgos_apds9960 *sensor, uint8_t drive) {
