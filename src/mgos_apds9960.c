@@ -1526,7 +1526,7 @@ bool mgos_apds9960_clear_proximity_int(struct mgos_apds9960 *sensor) {
   return true;
 }
 
-bool mgos_apds9960_read_ambient_light(struct mgos_apds9960 *sensor, uint16_t *val) {
+static bool mgos_apds9960_read_ambient_light(struct mgos_apds9960 *sensor, uint16_t *val) {
   uint8_t val_byte;
 
   if (!sensor || !val) {
@@ -1547,7 +1547,7 @@ bool mgos_apds9960_read_ambient_light(struct mgos_apds9960 *sensor, uint16_t *va
   return true;
 }
 
-bool mgos_apds9960_read_red_light(struct mgos_apds9960 *sensor, uint16_t *val) {
+static bool mgos_apds9960_read_red_light(struct mgos_apds9960 *sensor, uint16_t *val) {
   uint8_t val_byte;
 
   if (!sensor || !val) {
@@ -1568,7 +1568,7 @@ bool mgos_apds9960_read_red_light(struct mgos_apds9960 *sensor, uint16_t *val) {
   return true;
 }
 
-bool mgos_apds9960_read_green_light(struct mgos_apds9960 *sensor, uint16_t *val) {
+static bool mgos_apds9960_read_green_light(struct mgos_apds9960 *sensor, uint16_t *val) {
   uint8_t val_byte;
 
   if (!sensor || !val) {
@@ -1589,7 +1589,7 @@ bool mgos_apds9960_read_green_light(struct mgos_apds9960 *sensor, uint16_t *val)
   return true;
 }
 
-bool mgos_apds9960_read_blue_light(struct mgos_apds9960 *sensor, uint16_t *val) {
+static bool mgos_apds9960_read_blue_light(struct mgos_apds9960 *sensor, uint16_t *val) {
   uint8_t val_byte;
 
   if (!sensor || !val) {
@@ -1609,6 +1609,33 @@ bool mgos_apds9960_read_blue_light(struct mgos_apds9960 *sensor, uint16_t *val) 
 
   return true;
 }
+
+bool mgos_apds9960_read_light(struct mgos_apds9960 *sensor, uint16_t *c, uint16_t *r, uint16_t *g, uint16_t *b) {
+  uint8_t crgb[8];
+
+  if (!sensor) {
+    return false;
+  }
+
+  if (c) {
+    if (!mgos_apds9960_read_ambient_light(sensor, c))
+      return false;
+  }
+  if (r) {
+    if (!mgos_apds9960_read_red_light(sensor, r))
+      return false;
+  }
+  if (g) {
+    if (!mgos_apds9960_read_green_light(sensor, g))
+      return false;
+  }
+  if (b) {
+    if (!mgos_apds9960_read_blue_light(sensor, b))
+      return false;
+  }
+  return true;
+}
+
 
 bool mgos_apds9960_read_proximity(struct mgos_apds9960 *sensor, uint8_t *val) {
   if (!sensor || !val) {

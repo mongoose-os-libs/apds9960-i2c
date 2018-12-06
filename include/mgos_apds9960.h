@@ -90,10 +90,7 @@ bool mgos_apds9960_set_gesture_int_enable(struct mgos_apds9960 *sensor, uint8_t 
 bool mgos_apds9960_clear_ambientlight_int(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_clear_proximity_int(struct mgos_apds9960 *sensor);
 
-bool mgos_apds9960_read_ambient_light(struct mgos_apds9960 *sensor, uint16_t *val);
-bool mgos_apds9960_read_red_light(struct mgos_apds9960 *sensor, uint16_t *val);
-bool mgos_apds9960_read_green_light(struct mgos_apds9960 *sensor, uint16_t *val);
-bool mgos_apds9960_read_blue_light(struct mgos_apds9960 *sensor, uint16_t *val);
+bool mgos_apds9960_read_light(struct mgos_apds9960 *sensor, uint16_t *ambient, uint16_t *red, uint16_t *green, uint16_t *blue);
 
 bool mgos_apds9960_read_proximity(struct mgos_apds9960 *sensor, uint8_t *val);
 
