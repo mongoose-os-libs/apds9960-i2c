@@ -66,7 +66,7 @@ struct mgos_apds9960 *mgos_apds9960_create(struct mgos_i2c *i2c, uint8_t i2caddr
   if (mgos_sys_config_get_apds9960_irq_pin() > 0) {
     mgos_gpio_set_mode(mgos_sys_config_get_apds9960_irq_pin(), MGOS_GPIO_MODE_INPUT);
     mgos_gpio_set_pull(mgos_sys_config_get_apds9960_irq_pin(), MGOS_GPIO_PULL_UP);
-    mgos_gpio_set_int_handler(mgos_sys_config_get_apds9960_irq_pin(), MGOS_GPIO_INT_EDGE_NEG, mgos_apds9960_irq, NULL);
+    mgos_gpio_set_int_handler(mgos_sys_config_get_apds9960_irq_pin(), MGOS_GPIO_INT_EDGE_NEG, mgos_apds9960_irq, sensor);
     mgos_gpio_enable_int(mgos_sys_config_get_apds9960_irq_pin());
   }
 
@@ -343,7 +343,30 @@ bool mgos_apds9960_set_callback_gesture(struct mgos_apds9960 *sensor, uint16_t e
 }
 
 void mgos_apds9960_irq(int pin, void *arg) {
-  LOG(LL_INFO, ("Interrupt fired for APDS9960"));
+  struct mgos_apds9960 *sensor = (struct mgos_apds9960 *)arg;
+  bool light_firing            = false;
+  bool proximity_firing        = false;
+
+  if (!arg) {
+    LOG(LL_ERROR, ("Interrupt fired for APDS9960, but no sensor to poll"));
+  }
+
+  mgos_apds9960_get_light_int(sensor, &light_firing);
+  mgos_apds9960_get_proximity_int(sensor, &proximity_firing);
+  // LOG(LL_INFO, ("Interrupt fired for APDS9960: light=%u proximity=%u", light_firing, proximity_firing));
+
+  if (light_firing && sensor->light_handler) {
+    uint16_t clear = 0, red = 0, green = 0, blue = 0;
+    mgos_apds9960_read_light(sensor, &clear, &red, &green, &blue);
+    sensor->light_handler(clear, red, green, blue);
+  }
+  if (proximity_firing && sensor->proximity_handler) {
+    uint8_t proximity;
+    mgos_apds9960_read_proximity(sensor, &proximity);
+    sensor->proximity_handler(proximity);
+  }
+
+  mgos_apds9960_clear_proximity_int(sensor);
+  mgos_apds9960_clear_light_int(sensor);
   (void)pin;
-  (void)arg;
 }
