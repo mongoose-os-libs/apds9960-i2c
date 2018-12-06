@@ -41,13 +41,6 @@ enum mgos_apds9960_direction_t {
   APDS9960_DIR_ALL
 };
 
-enum mgos_apds9960_state_t {
-  APDS9960_NA_STATE,
-  APDS9960_NEAR_STATE,
-  APDS9960_FAR_STATE,
-  APDS9960_ALL_STATE
-};
-
 
 // Callback handlers
 typedef void (*mgos_apds9960_light_event_t)(uint16_t clear, uint16_t red, uint16_t green, uint16_t blue);

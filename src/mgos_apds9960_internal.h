@@ -185,6 +185,13 @@ extern "C" {
 #define APDS9960_DEFAULT_GCONF3            0     // All photodiodes active during gesture
 #define APDS9960_DEFAULT_GIEN              0     // Disable gesture interrupts
 
+enum mgos_apds9960_state_t {
+  APDS9960_NA_STATE,
+  APDS9960_NEAR_STATE,
+  APDS9960_FAR_STATE,
+  APDS9960_ALL_STATE
+};
+
 /* Container for gesture data */
 typedef struct apds9960_gesture_data_type {
   uint8_t u_data[32];
@@ -210,7 +217,7 @@ struct mgos_apds9960 {
   int                        gesture_lr_count_;
   int                        gesture_near_count_;
   int                        gesture_far_count_;
-  int                        gesture_state_;
+  enum mgos_apds9960_state_t gesture_state_;
   int                        gesture_motion_;
 };
 
