@@ -185,25 +185,6 @@ extern "C" {
 #define APDS9960_DEFAULT_GCONF3            0     // All photodiodes active during gesture
 #define APDS9960_DEFAULT_GIEN              0     // Disable gesture interrupts
 
-enum mgos_apds9960_state_t {
-  APDS9960_NA_STATE,
-  APDS9960_NEAR_STATE,
-  APDS9960_FAR_STATE,
-  APDS9960_ALL_STATE
-};
-
-/* Container for gesture data */
-typedef struct apds9960_gesture_data_type {
-  uint8_t u_data[32];
-  uint8_t d_data[32];
-  uint8_t l_data[32];
-  uint8_t r_data[32];
-  uint8_t index;
-  uint8_t total_gestures;
-  uint8_t in_threshold;
-  uint8_t out_threshold;
-} apds9960_gesture_data_type;
-
 struct mgos_apds9960 {
   struct mgos_i2c *               i2c;
   uint8_t                         i2caddr;
@@ -213,26 +194,19 @@ struct mgos_apds9960 {
   mgos_apds9960_proximity_event_t proximity_handler;
   mgos_apds9960_gesture_event_t   gesture_handler;
 
-
   /* Private data for the driver */
-  apds9960_gesture_data_type      gesture_data_;
-  int                             gesture_ud_delta_;
-  int                             gesture_lr_delta_;
-  int                             gesture_ud_count_;
-  int                             gesture_lr_count_;
-  int                             gesture_near_count_;
-  int                             gesture_far_count_;
-  enum mgos_apds9960_state_t      gesture_state_;
-  int                             gesture_motion_;
+  int                             up_cnt;
+  int                             down_cnt;
+  int                             left_cnt;
+  int                             right_cnt;
 };
 
 /* Mongoose OS intiializer */
 bool mgos_apds9960_i2c_init(void);
 
 /* Private methods */
-void mgos_apds9960_resetGestureParameters(struct mgos_apds9960 *sensor);
-bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor);
-bool mgos_apds9960_decodeGesture(struct mgos_apds9960 *sensor);
+void mgos_apds9960_reset_gesture_data(struct mgos_apds9960 *sensor);
+void mgos_apds9960_irq(int pin, void *arg);
 
 /* I2C Primitives */
 bool mgos_apds9960_wireWriteByte(struct mgos_apds9960 *sensor, uint8_t val);
@@ -241,7 +215,6 @@ bool mgos_apds9960_wireWriteDataBlock(struct mgos_apds9960 *sensor, uint8_t reg,
 bool mgos_apds9960_wireReadDataByte(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val);
 int mgos_apds9960_wireReadDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len);
 
-void mgos_apds9960_irq(int pin, void *arg);
 
 #ifdef __cplusplus
 }

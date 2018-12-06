@@ -17,291 +17,6 @@
 #include "mgos_apds9960_internal.h"
 
 /* Start sparkfun import */
-void mgos_apds9960_resetGestureParameters(struct mgos_apds9960 *sensor) {
-  if (!sensor) {
-    return;
-  }
-  sensor->gesture_data_.index          = 0;
-  sensor->gesture_data_.total_gestures = 0;
-  sensor->gesture_ud_delta_            = 0;
-  sensor->gesture_lr_delta_            = 0;
-  sensor->gesture_ud_count_            = 0;
-  sensor->gesture_lr_count_            = 0;
-  sensor->gesture_near_count_          = 0;
-  sensor->gesture_far_count_           = 0;
-  sensor->gesture_state_  = 0;
-  sensor->gesture_motion_ = APDS9960_DIR_NONE;
-  return;
-}
-
-bool mgos_apds9960_processGestureData(struct mgos_apds9960 *sensor) {
-  uint8_t u_first = 0;
-  uint8_t d_first = 0;
-  uint8_t l_first = 0;
-  uint8_t r_first = 0;
-  uint8_t u_last  = 0;
-  uint8_t d_last  = 0;
-  uint8_t l_last  = 0;
-  uint8_t r_last  = 0;
-  int     ud_ratio_first;
-  int     lr_ratio_first;
-  int     ud_ratio_last;
-  int     lr_ratio_last;
-  int     ud_delta;
-  int     lr_delta;
-  int     i;
-
-  if (!sensor) {
-    return false;
-  }
-
-  // If we have less than 4 total gestures, that's not enough
-  if (sensor->gesture_data_.total_gestures <= 4) {
-    return false;
-  }
-
-  // Check to make sure our data isn't out of bounds
-  if ((sensor->gesture_data_.total_gestures <= 32) && \
-      (sensor->gesture_data_.total_gestures > 0)) {
-    // Find the first value in U/D/L/R above the threshold
-    for (i = 0; i < sensor->gesture_data_.total_gestures; i++) {
-      if ((sensor->gesture_data_.u_data[i] > APDS9960_GESTURE_THRESHOLD_OUT) &&
-          (sensor->gesture_data_.d_data[i] > APDS9960_GESTURE_THRESHOLD_OUT) &&
-          (sensor->gesture_data_.l_data[i] > APDS9960_GESTURE_THRESHOLD_OUT) &&
-          (sensor->gesture_data_.r_data[i] > APDS9960_GESTURE_THRESHOLD_OUT)) {
-        u_first = sensor->gesture_data_.u_data[i];
-        d_first = sensor->gesture_data_.d_data[i];
-        l_first = sensor->gesture_data_.l_data[i];
-        r_first = sensor->gesture_data_.r_data[i];
-        break;
-      }
-    }
-
-    // If one of the _first values is 0, then there is no good data
-    if ((u_first == 0) || (d_first == 0) || \
-        (l_first == 0) || (r_first == 0)) {
-      return false;
-    }
-    // Find the last value in U/D/L/R above the threshold
-    for (i = sensor->gesture_data_.total_gestures - 1; i >= 0; i--) {
-#if DEBUG
-      LOG(LL_DEBUG, ("Finding last: U=%d D=%d L=%d R=%d", sensor->gesture_data_.u_data[i], sensor->gesture_data_.d_data[i], sensor->gesture_data_.l_data[i], sensor->gesture_data_.r_data[i]));
-
-      /*
-       * Serial.print(F("Finding last: "));
-       * Serial.print(F("U:"));
-       * Serial.print(sensor->gesture_data_.u_data[i]);
-       * Serial.print(F(" D:"));
-       * Serial.print(sensor->gesture_data_.d_data[i]);
-       * Serial.print(F(" L:"));
-       * Serial.print(sensor->gesture_data_.l_data[i]);
-       * Serial.print(F(" R:"));
-       * Serial.println(sensor->gesture_data_.r_data[i]);
-       */
-#endif
-      if ((sensor->gesture_data_.u_data[i] > APDS9960_GESTURE_THRESHOLD_OUT) &&
-          (sensor->gesture_data_.d_data[i] > APDS9960_GESTURE_THRESHOLD_OUT) &&
-          (sensor->gesture_data_.l_data[i] > APDS9960_GESTURE_THRESHOLD_OUT) &&
-          (sensor->gesture_data_.r_data[i] > APDS9960_GESTURE_THRESHOLD_OUT)) {
-        u_last = sensor->gesture_data_.u_data[i];
-        d_last = sensor->gesture_data_.d_data[i];
-        l_last = sensor->gesture_data_.l_data[i];
-        r_last = sensor->gesture_data_.r_data[i];
-        break;
-      }
-    }
-  }
-
-  // Calculate the first vs. last ratio of up/down and left/right
-  ud_ratio_first = ((u_first - d_first) * 100) / (u_first + d_first);
-  lr_ratio_first = ((l_first - r_first) * 100) / (l_first + r_first);
-  ud_ratio_last  = ((u_last - d_last) * 100) / (u_last + d_last);
-  lr_ratio_last  = ((l_last - r_last) * 100) / (l_last + r_last);
-
-#if DEBUG
-  LOG(LL_DEBUG, ("Last Values: U=%d D=%d L=%d R=%d", u_last, d_last, l_last, r_last));
-  LOG(LL_DEBUG, ("Ratios: UDFi=%d UDLa=%d LRFi=%d LRLa=%d", ud_ratio_first, ud_ratio_last, lr_ratio_first, lr_ratio_last));
-
-  /*
-   * Serial.print(F("Last Values: "));
-   * Serial.print(F("U:"));
-   * Serial.print(u_last);
-   * Serial.print(F(" D:"));
-   * Serial.print(d_last);
-   * Serial.print(F(" L:"));
-   * Serial.print(l_last);
-   * Serial.print(F(" R:"));
-   * Serial.println(r_last);
-   *
-   * Serial.print(F("Ratios: "));
-   * Serial.print(F("UD Fi: "));
-   * Serial.print(ud_ratio_first);
-   * Serial.print(F(" UD La: "));
-   * Serial.print(ud_ratio_last);
-   * Serial.print(F(" LR Fi: "));
-   * Serial.print(lr_ratio_first);
-   * Serial.print(F(" LR La: "));
-   * Serial.println(lr_ratio_last);
-   */
-#endif
-
-  // Determine the difference between the first and last ratios
-  ud_delta = ud_ratio_last - ud_ratio_first;
-  lr_delta = lr_ratio_last - lr_ratio_first;
-
-#if DEBUG
-  LOG(LL_DEBUG, ("Deltas: UD=%d LR=%d", ud_delta, lr_delta));
-
-  /*
-   * Serial.print("Deltas: ");
-   * Serial.print("UD: ");
-   * Serial.print(ud_delta);
-   * Serial.print(" LR: ");
-   * Serial.println(lr_delta);
-   */
-#endif
-
-  // Accumulate the UD and LR delta values
-  sensor->gesture_ud_delta_ += ud_delta;
-  sensor->gesture_lr_delta_ += lr_delta;
-
-#if DEBUG
-  LOG(LL_DEBUG, ("Accumulations: UD=%d LR=%d", sensor->gesture_ud_delta_, sensor->gesture_lr_delta_));
-
-  /*
-   * Serial.print("Accumulations: ");
-   * Serial.print("UD: ");
-   * Serial.print(sensor->gesture_ud_delta_);
-   * Serial.print(" LR: ");
-   * Serial.println(sensor->gesture_lr_delta_);
-   */
-#endif
-
-  // Determine U/D gesture
-  if (sensor->gesture_ud_delta_ >= APDS9960_GESTURE_SENSITIVITY_1) {
-    sensor->gesture_ud_count_ = 1;
-  } else if (sensor->gesture_ud_delta_ <= -APDS9960_GESTURE_SENSITIVITY_1) {
-    sensor->gesture_ud_count_ = -1;
-  } else {
-    sensor->gesture_ud_count_ = 0;
-  }
-
-  // Determine L/R gesture
-  if (sensor->gesture_lr_delta_ >= APDS9960_GESTURE_SENSITIVITY_1) {
-    sensor->gesture_lr_count_ = 1;
-  } else if (sensor->gesture_lr_delta_ <= -APDS9960_GESTURE_SENSITIVITY_1) {
-    sensor->gesture_lr_count_ = -1;
-  } else {
-    sensor->gesture_lr_count_ = 0;
-  }
-
-  // Determine Near/Far gesture
-  if ((sensor->gesture_ud_count_ == 0) && (sensor->gesture_lr_count_ == 0)) {
-    if ((abs(ud_delta) < APDS9960_GESTURE_SENSITIVITY_2) && \
-        (abs(lr_delta) < APDS9960_GESTURE_SENSITIVITY_2)) {
-      if ((ud_delta == 0) && (lr_delta == 0)) {
-        sensor->gesture_near_count_++;
-      } else if ((ud_delta != 0) || (lr_delta != 0)) {
-        sensor->gesture_far_count_++;
-      }
-
-      if ((sensor->gesture_near_count_ >= 10) && (sensor->gesture_far_count_ >= 2)) {
-        if ((ud_delta == 0) && (lr_delta == 0)) {
-          sensor->gesture_state_ = APDS9960_NEAR_STATE;
-        } else if ((ud_delta != 0) && (lr_delta != 0)) {
-          sensor->gesture_state_ = APDS9960_FAR_STATE;
-        }
-        return true;
-      }
-    }
-  } else {
-    if ((abs(ud_delta) < APDS9960_GESTURE_SENSITIVITY_2) && \
-        (abs(lr_delta) < APDS9960_GESTURE_SENSITIVITY_2)) {
-      if ((ud_delta == 0) && (lr_delta == 0)) {
-        sensor->gesture_near_count_++;
-      }
-
-      if (sensor->gesture_near_count_ >= 10) {
-        sensor->gesture_ud_count_ = 0;
-        sensor->gesture_lr_count_ = 0;
-        sensor->gesture_ud_delta_ = 0;
-        sensor->gesture_lr_delta_ = 0;
-      }
-    }
-  }
-
-#if DEBUG
-  LOG(LL_DEBUG, ("UD_CT=%d LR_CT=%d NEAR_CT=%d FAR_CT=%d", sensor->gesture_ud_count_, sensor->gesture_lr_count_, sensor->gesture_near_count_, sensor->gesture_far_count_));
-
-  /*
-   * Serial.print("UD_CT: ");
-   * Serial.print(sensor->gesture_ud_count_);
-   * Serial.print(" LR_CT: ");
-   * Serial.print(sensor->gesture_lr_count_);
-   * Serial.print(" NEAR_CT: ");
-   * Serial.print(sensor->gesture_near_count_);
-   * Serial.print(" FAR_CT: ");
-   * Serial.println(sensor->gesture_far_count_);
-   * Serial.println("----------");
-   */
-#endif
-  return false;
-}
-
-bool mgos_apds9960_decodeGesture(struct mgos_apds9960 *sensor) {
-  if (!sensor) {
-    return false;
-  }
-
-  // Return if near or far event is detected
-  if (sensor->gesture_state_ == APDS9960_NEAR_STATE) {
-    sensor->gesture_motion_ = APDS9960_DIR_NEAR;
-    return true;
-  } else if (sensor->gesture_state_ == APDS9960_FAR_STATE) {
-    sensor->gesture_motion_ = APDS9960_DIR_FAR;
-    return true;
-  }
-
-  // Determine swipe direction
-  if ((sensor->gesture_ud_count_ == -1) && (sensor->gesture_lr_count_ == 0)) {
-    sensor->gesture_motion_ = APDS9960_DIR_UP;
-  } else if ((sensor->gesture_ud_count_ == 1) && (sensor->gesture_lr_count_ == 0)) {
-    sensor->gesture_motion_ = APDS9960_DIR_DOWN;
-  } else if ((sensor->gesture_ud_count_ == 0) && (sensor->gesture_lr_count_ == 1)) {
-    sensor->gesture_motion_ = APDS9960_DIR_RIGHT;
-  } else if ((sensor->gesture_ud_count_ == 0) && (sensor->gesture_lr_count_ == -1)) {
-    sensor->gesture_motion_ = APDS9960_DIR_LEFT;
-  } else if ((sensor->gesture_ud_count_ == -1) && (sensor->gesture_lr_count_ == 1)) {
-    if (abs(sensor->gesture_ud_delta_) > abs(sensor->gesture_lr_delta_)) {
-      sensor->gesture_motion_ = APDS9960_DIR_UP;
-    } else {
-      sensor->gesture_motion_ = APDS9960_DIR_RIGHT;
-    }
-  } else if ((sensor->gesture_ud_count_ == 1) && (sensor->gesture_lr_count_ == -1)) {
-    if (abs(sensor->gesture_ud_delta_) > abs(sensor->gesture_lr_delta_)) {
-      sensor->gesture_motion_ = APDS9960_DIR_DOWN;
-    } else {
-      sensor->gesture_motion_ = APDS9960_DIR_LEFT;
-    }
-  } else if ((sensor->gesture_ud_count_ == -1) && (sensor->gesture_lr_count_ == -1)) {
-    if (abs(sensor->gesture_ud_delta_) > abs(sensor->gesture_lr_delta_)) {
-      sensor->gesture_motion_ = APDS9960_DIR_UP;
-    } else {
-      sensor->gesture_motion_ = APDS9960_DIR_LEFT;
-    }
-  } else if ((sensor->gesture_ud_count_ == 1) && (sensor->gesture_lr_count_ == 1)) {
-    if (abs(sensor->gesture_ud_delta_) > abs(sensor->gesture_lr_delta_)) {
-      sensor->gesture_motion_ = APDS9960_DIR_DOWN;
-    } else {
-      sensor->gesture_motion_ = APDS9960_DIR_RIGHT;
-    }
-  } else {
-    return false;
-  }
-
-  return true;
-}
-
 bool mgos_apds9960_get_led_boost(struct mgos_apds9960 *sensor, uint8_t *boost) {
   if (!sensor || !boost) {
     return false;
@@ -775,7 +490,7 @@ bool mgos_apds9960_enable_gesture_sensor(struct mgos_apds9960 *sensor) {
    * Set AUX to LED_BOOST_300
    * Enable PON, WEN, PEN, GEN in ENABLE
    */
-  mgos_apds9960_resetGestureParameters(sensor);
+  mgos_apds9960_reset_gesture_data(sensor);
   if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_WTIME, 0xFF)) {
     return false;
   }
@@ -808,7 +523,7 @@ bool mgos_apds9960_disable_gesture_sensor(struct mgos_apds9960 *sensor) {
   if (!sensor) {
     return false;
   }
-  mgos_apds9960_resetGestureParameters(sensor);
+  mgos_apds9960_reset_gesture_data(sensor);
   if (!mgos_apds9960_set_gesture_int_enable(sensor, 0)) {
     return false;
   }
@@ -1416,9 +1131,6 @@ bool mgos_apds9960_get_gesture_fifo(struct mgos_apds9960 *sensor, uint8_t *fifo,
   if (!sensor || !fifo || !bytes_read) {
     return false;
   }
-  if (!mgos_apds9960_is_gesture_available(sensor)) {
-    return false;
-  }
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GFLVL, &fifo_level)) {
     return false;
   }
@@ -1427,7 +1139,6 @@ bool mgos_apds9960_get_gesture_fifo(struct mgos_apds9960 *sensor, uint8_t *fifo,
   }
 
   readlen = mgos_apds9960_wireReadDataBlock(sensor, APDS9960_GFIFO_U, fifo, (fifo_level * 4));
-  LOG(LL_INFO, ("fifo_level=%u bytes_read=%d", fifo_level, readlen));
   if (readlen < 1) {
     return false;
   }

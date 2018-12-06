@@ -30,20 +30,12 @@ struct mgos_apds9960 *mgos_apds9960_create(struct mgos_i2c *i2c, uint8_t i2caddr
   }
 
   memset(sensor, 0, sizeof(struct mgos_apds9960));
-  sensor->i2caddr             = i2caddr;
-  sensor->i2c                 = i2c;
-  sensor->gesture_ud_delta_   = 0;
-  sensor->gesture_lr_delta_   = 0;
-  sensor->gesture_ud_count_   = 0;
-  sensor->gesture_lr_count_   = 0;
-  sensor->gesture_near_count_ = 0;
-  sensor->gesture_far_count_  = 0;
-  sensor->gesture_state_      = 0;
-  sensor->gesture_motion_     = APDS9960_DIR_NONE;
-  sensor->light_handler       = NULL;
-  sensor->proximity_handler   = NULL;
-  sensor->gesture_handler     = NULL;
-  mgos_apds9960_resetGestureParameters(sensor);
+  sensor->i2caddr           = i2caddr;
+  sensor->i2c               = i2c;
+  sensor->light_handler     = NULL;
+  sensor->proximity_handler = NULL;
+  sensor->gesture_handler   = NULL;
+  mgos_apds9960_reset_gesture_data(sensor);
 
   if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_ID, &id)) {
     LOG(LL_ERROR, ("Cannot read from device at I2C 0x%02x", sensor->i2caddr));
@@ -139,140 +131,6 @@ bool mgos_apds9960_is_gesture_available(struct mgos_apds9960 *sensor) {
   return val == 1;
 }
 
-int mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor) {
-  uint8_t fifo_level = 0;
-  int     bytes_read = 0;
-  uint8_t fifo_data[128];
-  uint8_t gstatus;
-  int     motion;
-  int     i;
-  uint8_t mode;
-
-  if (!sensor) {
-    return -1;
-  }
-
-  if (!mgos_apds9960_is_gesture_available(sensor)) {
-    return APDS9960_DIR_NONE;
-  }
-  if (!mgos_apds9960_get_mode(sensor, &mode)) {
-    return APDS9960_DIR_NONE;
-  }
-  if ((mode & 0b01000001) == 0) {
-    return APDS9960_DIR_NONE;
-  }
-  // Keep looping as long as gesture data is valid
-  while (1) {
-    // Wait some time to collect next batch of FIFO data
-    mgos_msleep(APDS9960_FIFO_PAUSE_TIME);
-
-    // Get the contents of the STATUS register. Is data still valid?
-    if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GSTATUS, &gstatus)) {
-      return APDS9960_ERROR;
-    }
-
-    // If we have valid data, read in FIFO
-    if ((gstatus & APDS9960_GVALID) == APDS9960_GVALID) {
-      // Read the current FIFO level
-      if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_GFLVL, &fifo_level)) {
-        return APDS9960_ERROR;
-      }
-
-#if DEBUG
-      LOG(LL_DEBUG, ("FIFO Level: %d", fifo_level));
-
-      /*
-       * Serial.print("FIFO Level: ");
-       * Serial.println(fifo_level);
-       */
-#endif
-
-      // If there's stuff in the FIFO, read it into our data block
-      if (fifo_level > 0) {
-        bytes_read = mgos_apds9960_wireReadDataBlock(sensor, APDS9960_GFIFO_U,
-                                                     (uint8_t *)fifo_data,
-                                                     (fifo_level * 4));
-        if (bytes_read == -1) {
-          return APDS9960_ERROR;
-        }
-#if DEBUG
-        LOG(LL_DEBUG, ("FIFO Dump:"));
-        for (i = 0; i < bytes_read; i++) {
-          LOG(LL_DEBUG, ("%d", fifo_data[i]));
-        }
-
-        /*
-         * Serial.print("FIFO Dump: ");
-         * for ( i = 0; i < bytes_read; i++ ) {
-         *  Serial.print(fifo_data[i]);
-         *  Serial.print(" ");
-         * }
-         * Serial.println();
-         */
-#endif
-
-        // If at least 1 set of data, sort the data into U/D/L/R
-        if (bytes_read >= 4) {
-          for (i = 0; i < bytes_read; i += 4) {
-            sensor->gesture_data_.u_data[sensor->gesture_data_.index] = fifo_data[i + 0];
-            sensor->gesture_data_.d_data[sensor->gesture_data_.index] = fifo_data[i + 1];
-            sensor->gesture_data_.l_data[sensor->gesture_data_.index] = fifo_data[i + 2];
-            sensor->gesture_data_.r_data[sensor->gesture_data_.index] = fifo_data[i + 3];
-            sensor->gesture_data_.index++;
-            sensor->gesture_data_.total_gestures++;
-          }
-
-#if DEBUG
-          LOG(LL_DEBUG, ("Up Data:"));
-          for (i = 0; i < sensor->gesture_data_.total_gestures; i++) {
-            LOG(LL_DEBUG, ("%d", sensor->gesture_data_.u_data[i]));
-          }
-
-          /*
-           * Serial.print("Up Data: ");
-           * for ( i = 0; i < sensor->gesture_data_.total_gestures; i++ ) {
-           *  Serial.print(sensor->gesture_data_.u_data[i]);
-           *  Serial.print(" ");
-           * }
-           * Serial.println();
-           */
-#endif
-
-          // Filter and process gesture data. Decode near/far state
-          if (mgos_apds9960_processGestureData(sensor)) {
-            if (mgos_apds9960_decodeGesture(sensor)) {
-              // ***TODO: U-Turn Gestures
-#if DEBUG
-              //Serial.println(gesture_motion_);
-#endif
-            }
-          }
-
-          // Reset data
-          sensor->gesture_data_.index          = 0;
-          sensor->gesture_data_.total_gestures = 0;
-        }
-      }
-    } else {
-      // Determine best guessed gesture and clean up
-      mgos_msleep(APDS9960_FIFO_PAUSE_TIME);
-      mgos_apds9960_decodeGesture(sensor);
-      motion = sensor->gesture_motion_;
-#if DEBUG
-      LOG(LL_DEBUG, ("END: %d", sensor->gesture_motion_));
-
-      /*
-       * Serial.print("END: ");
-       * Serial.println(sensor->gesture_motion_);
-       */
-#endif
-      mgos_apds9960_resetGestureParameters(sensor);
-      return motion;
-    }
-  }
-  return -1;
-}
-
 bool mgos_apds9960_set_callback_light(struct mgos_apds9960 *sensor, uint16_t low_threshold, uint16_t high_threshold, mgos_apds9960_light_event_t handler) {
   if (!sensor) {
     return false;
@@ -345,6 +203,108 @@ bool mgos_apds9960_set_callback_gesture(struct mgos_apds9960 *sensor, mgos_apds9
   return true;
 }
 
+void mgos_apds9960_reset_gesture_data(struct mgos_apds9960 *sensor) {
+  uint8_t fifo[128];
+  uint8_t bytes_read;
+
+  if (!sensor) {
+    return;
+  }
+  sensor->up_cnt    = 0;
+  sensor->down_cnt  = 0;
+  sensor->left_cnt  = 0;
+  sensor->right_cnt = 0;
+  while (mgos_apds9960_is_gesture_available(sensor)) {
+    mgos_apds9960_get_gesture_fifo(sensor, fifo, &bytes_read);
+    if (bytes_read > 0) {
+      LOG(LL_INFO, ("Flushed %d bytes from Gesture FIFO", bytes_read));
+    }
+  }
+  return;
+}
+
+bool mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor, enum mgos_apds9960_direction_t *direction) {
+  uint8_t fifo[128];
+  uint8_t bytes_read;
+  double  start           = 0;
+  int     up_down_diff    = 0;
+  int     left_right_diff = 0;
+  enum mgos_apds9960_direction_t gestureReceived;
+
+  if (!sensor || !direction) {
+    return false;
+  }
+
+  start = mg_time();
+  while (mgos_apds9960_is_gesture_available(sensor)) {
+    double now = 0;
+    gestureReceived = APDS9960_DIR_NONE;
+
+    mgos_msleep(10);
+    if (!mgos_apds9960_get_gesture_fifo(sensor, fifo, &bytes_read)) {
+      LOG(LL_ERROR, ("Could not read Gesture FIFO"));
+      return false;
+    }
+
+    LOG(LL_INFO, ("Read %u bytes from Gesture FIFO", bytes_read));
+    for (int i = 0; i < bytes_read / 4; i++) {
+      // LOG(LL_INFO, ("U=%u D=%u L=%u R=%u", fifo[i*4+0], fifo[i*4+1], fifo[i*4+2], fifo[i*4+3]));
+      if (abs((int)fifo[i * 4 + 0] - (int)fifo[i * 4 + 1]) > 13) {
+        up_down_diff += (int)fifo[i * 4 + 0] - (int)fifo[i * 4 + 1];
+      }
+      if (abs((int)fifo[i * 4 + 2] - (int)fifo[i * 4 + 3]) > 13) {
+        left_right_diff += (int)fifo[i * 4 + 2] - (int)fifo[i * 4 + 3];
+      }
+    }
+    LOG(LL_INFO, ("up_down_diff=%d left_right_diff=%d", up_down_diff, left_right_diff));
+
+    if (up_down_diff < 0) {
+      if (sensor->down_cnt > 0) {
+        gestureReceived = APDS9960_DIR_UP;
+      } else {
+        sensor->up_cnt++;
+      }
+    } else if (up_down_diff > 0) {
+      if (sensor->up_cnt > 0) {
+        gestureReceived = APDS9960_DIR_DOWN;
+      } else {
+        sensor->down_cnt++;
+      }
+    }
+
+    if (left_right_diff < 0) {
+      if (sensor->right_cnt > 0) {
+        gestureReceived = APDS9960_DIR_LEFT;
+      } else {
+        sensor->left_cnt++;
+      }
+    } else if (left_right_diff > 0) {
+      if (sensor->left_cnt > 0) {
+        gestureReceived = APDS9960_DIR_RIGHT;
+      } else {
+        sensor->right_cnt++;
+      }
+    }
+
+    if (gestureReceived != APDS9960_DIR_NONE) {
+      mgos_apds9960_reset_gesture_data(sensor);
+      *direction = gestureReceived;
+      return true;
+    }
+
+    now = mg_time();
+    LOG(LL_INFO, ("start=%.4f now=%.4f", start, now));
+    if (now - start > (0.300)) {
+      LOG(LL_INFO, ("timeout"));
+      mgos_apds9960_reset_gesture_data(sensor);
+      *direction = APDS9960_DIR_NONE;
+      return false;
+    }
+  }
+  LOG(LL_WARN, ("No Gesture FIFO data available"));
+  return false;
+}
+
 void mgos_apds9960_irq(int pin, void *arg) {
   struct mgos_apds9960 *sensor = (struct mgos_apds9960 *)arg;
   bool light_firing            = false;
@@ -371,18 +331,11 @@ void mgos_apds9960_irq(int pin, void *arg) {
     sensor->proximity_handler(proximity);
   }
   if (gesture_firing && sensor->gesture_handler) {
-    uint8_t fifo[128];
-    uint8_t bytes_read = 0;
-    while (mgos_apds9960_is_gesture_available(sensor)) {
-      if (!mgos_apds9960_get_gesture_fifo(sensor, fifo, &bytes_read)) {
-        LOG(LL_ERROR, ("Could not read Gesture FIFO"));
-      } else {
-        LOG(LL_INFO, ("Read %u bytes from FIFO", bytes_read));
-        for (int i=0; i<bytes_read / 4; i++) {
-          LOG(LL_INFO, ("U=%u D=%u L=%u R=%u", fifo[i*4+0], fifo[i*4+1], fifo[i*4+2], fifo[i*4+3]));
-        }
-        sensor->gesture_handler(APDS9960_DIR_NONE);
-      }
+    enum mgos_apds9960_direction_t direction = APDS9960_DIR_NONE;
+    if (!mgos_apds9960_read_gesture(sensor, &direction)) {
+      LOG(LL_WARN, ("Could not read gesture"));
+    } else {
+      sensor->gesture_handler(direction);
     }
   }
 

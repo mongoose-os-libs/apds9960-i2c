@@ -78,4 +78,5 @@ bool mgos_apds9960_read_light(struct mgos_apds9960 *sensor, uint16_t *clear, uin
 bool mgos_apds9960_read_proximity(struct mgos_apds9960 *sensor, uint8_t *proximity);
 
 bool mgos_apds9960_is_gesture_available(struct mgos_apds9960 *sensor);
-int mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor);
+int mgos_apds9960_read_gesture_old(struct mgos_apds9960 *sensor);
+bool mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor, enum mgos_apds9960_direction_t *direction);
