@@ -302,52 +302,6 @@ bool mgos_apds9960_decodeGesture(struct mgos_apds9960 *sensor) {
   return true;
 }
 
-uint8_t mgos_apds9960_getProxIntLowThresh(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
-  }
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PILT, &val)) {
-    return 0;
-  }
-  return val;
-}
-
-bool mgos_apds9960_setProxIntLowThresh(struct mgos_apds9960 *sensor, uint8_t threshold) {
-  if (!sensor) {
-    return false;
-  }
-  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_PILT, threshold)) {
-    return false;
-  }
-
-  return true;
-}
-
-uint8_t mgos_apds9960_getProxIntHighThresh(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return 0;
-  }
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PIHT, &val)) {
-    return 0;
-  }
-  return val;
-}
-
-bool mgos_apds9960_setProxIntHighThresh(struct mgos_apds9960 *sensor, uint8_t threshold) {
-  if (!sensor) {
-    return false;
-  }
-  if (!mgos_apds9960_wireWriteDataByte(sensor, APDS9960_PILT, threshold)) {
-    return false;
-  }
-
-  return true;
-}
-
 uint8_t mgos_apds9960_getLEDBoost(struct mgos_apds9960 *sensor) {
   uint8_t val;
 
@@ -692,10 +646,10 @@ bool mgos_apds9960_init(struct mgos_apds9960 *sensor) {
   if (!mgos_apds9960_set_ambient_light_gain(sensor, APDS9960_DEFAULT_AGAIN)) {
     return false;
   }
-  if (!mgos_apds9960_setProxIntLowThresh(sensor, APDS9960_DEFAULT_PILT)) {
+  if (!mgos_apds9960_set_proximity_int_low_threshold(sensor, APDS9960_DEFAULT_PILT)) {
     return false;
   }
-  if (!mgos_apds9960_setProxIntHighThresh(sensor, APDS9960_DEFAULT_PIHT)) {
+  if (!mgos_apds9960_set_proximity_int_high_threshold(sensor, APDS9960_DEFAULT_PIHT)) {
     return false;
   }
   if (!mgos_apds9960_set_light_int_low_threshold(sensor, APDS9960_DEFAULT_AILT)) {

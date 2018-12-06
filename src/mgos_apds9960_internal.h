@@ -236,17 +236,6 @@ bool mgos_apds9960_wireWriteDataBlock(struct mgos_apds9960 *sensor, uint8_t reg,
 bool mgos_apds9960_wireReadDataByte(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val);
 int mgos_apds9960_wireReadDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len);
 
-bool mgos_apds9960_read_ambient_light(struct mgos_apds9960 *sensor, uint16_t *val);
-bool mgos_apds9960_read_red_light(struct mgos_apds9960 *sensor, uint16_t *val);
-bool mgos_apds9960_read_green_light(struct mgos_apds9960 *sensor, uint16_t *val);
-bool mgos_apds9960_read_blue_light(struct mgos_apds9960 *sensor, uint16_t *val);
-
-uint8_t mgos_apds9960_getProxIntLowThresh(struct mgos_apds9960 *sensor);
-bool mgos_apds9960_setProxIntLowThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
-
-uint8_t mgos_apds9960_getProxIntHighThresh(struct mgos_apds9960 *sensor);
-bool mgos_apds9960_setProxIntHighThresh(struct mgos_apds9960 *sensor, uint8_t threshold);
-
 uint8_t mgos_apds9960_getLEDBoost(struct mgos_apds9960 *sensor);
 bool mgos_apds9960_setLEDBoost(struct mgos_apds9960 *sensor, uint8_t boost);
 
