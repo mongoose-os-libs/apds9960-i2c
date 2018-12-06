@@ -849,7 +849,8 @@ bool mgos_apds9960_init(struct mgos_apds9960 *sensor) {
     return false;
   }
 
-  return true;
+  /* Turn on the sensor power */
+  return mgos_apds9960_enable(sensor);
 }
 
 bool mgos_apds9960_enable(struct mgos_apds9960 *sensor) {
