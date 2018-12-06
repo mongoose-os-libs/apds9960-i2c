@@ -680,51 +680,64 @@ static bool mgos_apds9960_wireWriteByte(struct mgos_apds9960 *sensor, uint8_t va
   if (!sensor) {
     return false;
   }
-  return false;
 
-  (void)val;
+  return mgos_i2c_write(sensor->i2c, sensor->i2caddr, &val, 1, true);
 }
 
 static bool mgos_apds9960_wireWriteDataByte(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t val) {
   if (!sensor) {
     return false;
   }
-  return false;
 
-  (void)reg;
-  (void)val;
+  return mgos_i2c_write_reg_b(sensor->i2c, sensor->i2caddr, reg, val);
 }
 
 static bool mgos_apds9960_wireWriteDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len) {
-  if (!sensor) {
+  if (!sensor || !val) {
     return false;
   }
-  return false;
 
-  (void)reg;
-  (void)val;
-  (void)len;
+  if (!mgos_i2c_write(sensor->i2c, sensor->i2caddr, &reg, 1, false)) {
+    mgos_i2c_stop(sensor->i2c);
+    return false;
+  }
+
+  return mgos_i2c_write(sensor->i2c, MGOS_I2C_ADDR_CONTINUE, val, len, true);
 }
 
 static bool mgos_apds9960_wireReadDataByte(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val) {
-  if (!sensor) {
+  int ret;
+
+  if (!sensor || !val) {
     return false;
   }
-  return false;
 
-  (void)reg;
-  (void)val;
+  ret = mgos_i2c_read_reg_b(sensor->i2c, sensor->i2caddr, reg);
+  if (ret < 0) {
+    mgos_i2c_stop(sensor->i2c);
+    return false;
+  }
+
+  *val = (uint8_t)ret;
+  return true;
 }
 
 static int mgos_apds9960_wireReadDataBlock(struct mgos_apds9960 *sensor, uint8_t reg, uint8_t *val, unsigned int len) {
   if (!sensor) {
     return -1;
   }
-  return -1;
 
-  (void)reg;
-  (void)val;
-  (void)len;
+  if (!mgos_i2c_write(sensor->i2c, sensor->i2caddr, &reg, 1, false)) {
+    mgos_i2c_stop(sensor->i2c);
+    return -1;
+  }
+
+  if (!mgos_i2c_read(sensor->i2c, MGOS_I2C_ADDR_CONTINUE, val, len, true)) {
+    mgos_i2c_stop(sensor->i2c);
+    return -1;
+  }
+
+  return len;
 }
 
 bool mgos_apds9960_init(struct mgos_apds9960 *sensor) {
