@@ -996,7 +996,7 @@ bool mgos_apds9960_get_light_int(struct mgos_apds9960 *sensor, bool *firing) {
   return true;
 }
 
-bool mgos_apds9960_clear_light_int(struct mgos_apds9960 *sensor) {
+bool mgos_apds9960_clear_int(struct mgos_apds9960 *sensor) {
   uint8_t val;
 
   if (!sensor) {
@@ -1021,19 +1021,6 @@ bool mgos_apds9960_get_proximity_int(struct mgos_apds9960 *sensor, bool *firing)
   }
 
   *firing = (val >> 5) & 0b00000001;
-  return true;
-}
-
-bool mgos_apds9960_clear_proximity_int(struct mgos_apds9960 *sensor) {
-  uint8_t val;
-
-  if (!sensor) {
-    return false;
-  }
-  if (!mgos_apds9960_wireReadDataByte(sensor, APDS9960_PICLEAR, &val)) {
-    return false;
-  }
-
   return true;
 }
 

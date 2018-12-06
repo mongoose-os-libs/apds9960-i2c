@@ -327,8 +327,9 @@ void mgos_apds9960_irq(int pin, void *arg) {
   }
   if (proximity_firing && sensor->proximity_handler) {
     uint8_t proximity;
-    mgos_apds9960_read_proximity(sensor, &proximity);
-    sensor->proximity_handler(proximity);
+    if (mgos_apds9960_read_proximity(sensor, &proximity)) {
+      sensor->proximity_handler(proximity);
+    }
   }
   if (gesture_firing && sensor->gesture_handler) {
     enum mgos_apds9960_direction_t direction = APDS9960_DIR_NONE;
@@ -339,7 +340,6 @@ void mgos_apds9960_irq(int pin, void *arg) {
     }
   }
 
-  mgos_apds9960_clear_proximity_int(sensor);
-  mgos_apds9960_clear_light_int(sensor);
+  mgos_apds9960_clear_int(sensor);
   (void)pin;
 }
