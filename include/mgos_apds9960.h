@@ -67,8 +67,22 @@ bool mgos_apds9960_set_callback_light(struct mgos_apds9960 *sensor, uint16_t low
 bool mgos_apds9960_set_callback_proximity(struct mgos_apds9960 *sensor, uint16_t low_threshold, uint16_t high_threshold, mgos_apds9960_proximity_event_t handler);
 bool mgos_apds9960_set_callback_gesture(struct mgos_apds9960 *sensor, uint16_t low_threshold, uint16_t high_threshold, mgos_apds9960_gesture_event_t handler);
 
+/*
+ * Read the clear (ambient), red, green, and blue light values from the sensor.
+ * Lower values mean less light was detected. The arguments clear, red, green
+ * and blue may be NULL, in which case they are not polled from the sensor.
+ * Returns true on success, or false otherwise. If false is returned, the
+ * values of clear, red, green and blue cannot be used.
+ */
 bool mgos_apds9960_read_light(struct mgos_apds9960 *sensor, uint16_t *clear, uint16_t *red, uint16_t *green, uint16_t *blue);
-bool mgos_apds9960_read_proximity(struct mgos_apds9960 *sensor, uint8_t *val);
+
+/*
+ * Read the proximity value from the sensor. Lower values mean further away,
+ * higher values mean closer to the sensor.
+ * Returns true on success, or false otherwise. If false is returned, the
+ * value of proximity cannot be used.
+ */
+bool mgos_apds9960_read_proximity(struct mgos_apds9960 *sensor, uint8_t *proximity);
 
 bool mgos_apds9960_is_gesture_available(struct mgos_apds9960 *sensor);
 int mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor);
