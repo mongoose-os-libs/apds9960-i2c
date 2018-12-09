@@ -240,7 +240,7 @@ bool mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor, enum mgos_apds9960
     double now = 0;
     gestureReceived = APDS9960_DIR_NONE;
 
-    mgos_msleep(10);
+    mgos_msleep(50);
     if (!mgos_apds9960_get_gesture_fifo(sensor, fifo, &bytes_read)) {
       LOG(LL_ERROR, ("Could not read Gesture FIFO"));
       return false;
@@ -248,7 +248,7 @@ bool mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor, enum mgos_apds9960
 
     LOG(LL_INFO, ("Read %u bytes from Gesture FIFO", bytes_read));
     for (int i = 0; i < bytes_read / 4; i++) {
-      // LOG(LL_INFO, ("U=%u D=%u L=%u R=%u", fifo[i*4+0], fifo[i*4+1], fifo[i*4+2], fifo[i*4+3]));
+      LOG(LL_INFO, ("U=%u D=%u L=%u R=%u", fifo[i*4+0], fifo[i*4+1], fifo[i*4+2], fifo[i*4+3]));
       if (abs((int)fifo[i * 4 + 0] - (int)fifo[i * 4 + 1]) > 13) {
         up_down_diff += (int)fifo[i * 4 + 0] - (int)fifo[i * 4 + 1];
       }
