@@ -71,7 +71,7 @@ void mgos_apds9960_destroy(struct mgos_apds9960 **sensor);
  * Returns true on success, or false otherwise.
  */
 bool mgos_apds9960_set_callback_light(struct mgos_apds9960 *sensor, uint16_t low_threshold, uint16_t high_threshold, mgos_apds9960_light_event_t handler);
-bool mgos_apds9960_set_callback_proximity(struct mgos_apds9960 *sensor, uint16_t low_threshold, uint16_t high_threshold, mgos_apds9960_proximity_event_t handler);
+bool mgos_apds9960_set_callback_proximity(struct mgos_apds9960 *sensor, uint8_t low_threshold, uint8_t high_threshold, mgos_apds9960_proximity_event_t handler);
 bool mgos_apds9960_set_callback_gesture(struct mgos_apds9960 *sensor, mgos_apds9960_gesture_event_t handler);
 
 /*

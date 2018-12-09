@@ -153,7 +153,7 @@ bool mgos_apds9960_set_callback_light(struct mgos_apds9960 *sensor, uint16_t low
   return true;
 }
 
-bool mgos_apds9960_set_callback_proximity(struct mgos_apds9960 *sensor, uint16_t low_threshold, uint16_t high_threshold, mgos_apds9960_proximity_event_t handler) {
+bool mgos_apds9960_set_callback_proximity(struct mgos_apds9960 *sensor, uint8_t low_threshold, uint8_t high_threshold, mgos_apds9960_proximity_event_t handler) {
   if (!sensor) {
     return false;
   }
