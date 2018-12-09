@@ -56,6 +56,20 @@ struct mgos_apds9960 *mgos_apds9960_create(struct mgos_i2c *i2c, uint8_t i2caddr
  */
 void mgos_apds9960_destroy(struct mgos_apds9960 **sensor);
 
+/*
+ * Install an interrupt (see `mos.yml` key `apds9960.irq_pin`), and when the
+ * interrupt is asserted, call a callback for `light`, `proximity` and/or
+ * `gesture` events.
+ *
+ * For light: `low_threshold` and `high_threshold` arguments determine between
+ * which values on the `clear` (ambient) light channel an interrupt is generated.
+ *
+ * For proximity: `low_threshold` and `high_threshold` arguments determine between
+ * which values on the `proximity` channel an interrupt is generated. Note: high
+ * values are closer to the sensor, low values are further away.
+ *
+ * Returns true on success, or false otherwise.
+ */
 bool mgos_apds9960_set_callback_light(struct mgos_apds9960 *sensor, uint16_t low_threshold, uint16_t high_threshold, mgos_apds9960_light_event_t handler);
 bool mgos_apds9960_set_callback_proximity(struct mgos_apds9960 *sensor, uint16_t low_threshold, uint16_t high_threshold, mgos_apds9960_proximity_event_t handler);
 bool mgos_apds9960_set_callback_gesture(struct mgos_apds9960 *sensor, mgos_apds9960_gesture_event_t handler);
@@ -77,6 +91,15 @@ bool mgos_apds9960_read_light(struct mgos_apds9960 *sensor, uint16_t *clear, uin
  */
 bool mgos_apds9960_read_proximity(struct mgos_apds9960 *sensor, uint8_t *proximity);
 
+/*
+ * Return true if the gesture sensor has available data in its FIFO buffer.
+ */
 bool mgos_apds9960_is_gesture_available(struct mgos_apds9960 *sensor);
-int mgos_apds9960_read_gesture_old(struct mgos_apds9960 *sensor);
+
+/*
+ * Compute the direction in which a gesture was sensed in the enum pointed to by
+ * *direction. Returns true if the gesture sensor could be read. Note: the return
+ * value does not correlate with a successful gesture computation! `APDS9960_DIR_NONE`
+ * is written to *direction and true returned if no gesture could be determined.
+ */
 bool mgos_apds9960_read_gesture(struct mgos_apds9960 *sensor, enum mgos_apds9960_direction_t *direction);
