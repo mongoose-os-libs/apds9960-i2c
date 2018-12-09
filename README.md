@@ -4,64 +4,60 @@ A Mongoose library for Avago's APDS-9960 RGB, IR and Gesture Sensor.
 
 ## Implementation details
 
-The APDS-9960 device features advanced Gesture detection,
-Proximity detection, Digital Ambient Light Sense
-(ALS) and Color Sense (RGBC). The slim modular package,
-L 3.94 x W 2.36 x H 1.35 mm, incorporates an IR LED and
-factory calibrated LED driver for drop-in compatibility
-with existing footprints.
+The APDS-9960 device features advanced Gesture detection, Proximity detection,
+Digital Ambient Light Sense (ALS) and Color Sense (RGBC). The slim modular
+package, L 3.94 x W 2.36 x H 1.35 mm, incorporates an IR LED and factory
+calibrated LED driver for drop-in compatibility with existing footprints.  
 
 ### Gesture detection
 
-Gesture detection utilizes four directional photodiodes to
-sense reflected IR energy (sourced by the integrated LED)
-to convert physical motion information (i.e. velocity, direction
-and distance) to a digital information. The architecture
-of the gesture engine features automatic activation
-(based on Proximity engine results), ambient light subtraction,
-cross-talk cancelation, dual 8-bit data converters,
-power saving inter-conversion delay, 32-dataset FIFO, and
-interrupt driven I2C communication. The gesture engine
-accommodates a wide range of mobile device gesturing
-requirements: simple UP-DOWN-RIGHT-LEFT gestures or
-more complex gestures can be accurately sensed. Power
-consumption and noise are minimized with adjustable IR
-LED timing.
+Gesture detection utilizes four directional photodiodes to sense reflected IR
+energy (sourced by the integrated LED) to convert physical motion information
+(i.e. velocity, direction and distance) to a digital information. The
+architecture of the gesture engine features automatic activation (based on
+Proximity engine results), ambient light subtraction, cross-talk cancelation,
+dual 8-bit data converters, power saving inter-conversion delay, 32-dataset
+FIFO, and interrupt driven I2C communication. The gesture engine accommodates
+a wide range of mobile device gesturing requirements: simple UP-DOWN-RIGHT-LEFT
+gestures or more complex gestures can be accurately sensed. Power consumption
+and noise are minimized with adjustable IR LED timing.
 
 ### Proximity detection
 
-The Proximity detection feature provides distance measurement
-(E.g. mobile device screen to user’s ear) by photodiode
-detection of reflected IR energy (sourced by the integrated
-LED). Detect/release events are interrupt driven,
-and occur whenever proximity result crosses upper and/
-or lower threshold settings. The proximity engine features
-offset adjustment registers to compensate for system
-offset caused by unwanted IR energy reflections appearing
-at the sensor. The IR LED intensity is factory trimmed
-to eliminate the need for end-equipment calibration due
-to component variations. Proximity results are further improved
-by automatic ambient light subtraction.
+The Proximity detection feature provides distance measurement (E.g. mobile
+device screen to user’s ear) by photodiode detection of reflected IR energy
+(sourced by the integrated LED). Detect/release events are interrupt driven,
+and occur whenever proximity result crosses upper and/ or lower threshold
+settings. The proximity engine features offset adjustment registers to
+compensate for system offset caused by unwanted IR energy reflections
+appearing at the sensor. The IR LED intensity is factory trimmed to eliminate
+ the need for end-equipment calibration due to component variations. Proximity
+ results are further improved by automatic ambient light subtraction.
 
 ### Color and ALS detection
 
-The Color and ALS detection feature provides red, green,
-blue and clear light intensity data. Each of the R, G, B, C
-channels have a UV and IR blocking filter and a dedicated
-data converter producing16-bit data simultaneously. This
-architecture allows applications to accurately measure
-ambient light and sense color which enables devices to
-calculate color temperature and control display backlight.
+The Color and ALS detection feature provides red, green, blue and clear light
+intensity data. Each of the R, G, B, C channels have a UV and IR blocking
+filter and a dedicated data converter producing16-bit data simultaneously. This
+architecture allows applications to accurately measure ambient light and sense
+color which enables devices to calculate color temperature and control display
+backlight.
 
 ## API Description
 
-There are two APIs defined in this driver. Firstly, a low level
-API is used to drive the configuration of the chip. Secondly,
-a higher level abstraction is provided for application programmers
-that want to merely read `proximity` and `light` data from the
-sensor, or install a hardware interrupt to callback user code
-upon certain events (such as `proximity`, `light` and `gesture`
-events described above.)
+There are two APIs defined in this driver. Firstly, a low level API is used to
+drive the configuration of the chip. Secondly, a higher level abstraction is
+provided for application programmers that want to merely read `proximity` and
+`light` data from the sensor, or install a hardware interrupt to callback user
+code upon certain events (such as `proximity`, `light` and `gesture` events
+described above.)
+
+### Notes
+
+Gesture sending is incredibly hard with this sensor. Work is needed to improve
+the performance of the gesture code in this driver.
+
+Proximity and Light sensing and interrupts are working fine.
 
 ## Example application
 
