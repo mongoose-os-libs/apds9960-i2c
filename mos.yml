@@ -16,7 +16,7 @@ config_schema:
   - ["apds9960.irq_pin", "i", 2, {title: "Interrupt pin"}]
 
 libs:
-  - origin: https://github.com/mongoose-os-libs/i2c
+  - location: https://github.com/mongoose-os-libs/i2c
 
 tags:
   - c
